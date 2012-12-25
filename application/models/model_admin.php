@@ -81,9 +81,24 @@ class Model_admin extends CI_Model{
         return $query;
     }
     
-    function update_mk($id)
+    function update_mk()
     {
-        
+        $id = $this->input->post('idmk');
+        echo 'id = '.$id;
+        if($id!=NULL)
+        {
+            $data = array(
+            'nama_mk'=>$this->input->post('namamk'),
+            'sks'=>$this->input->post('sks'),
+            'deskripsi'=>$this->input->post('deskripsi'),
+            'kelompok_keahlian'=>$this->input->post('kk')
+            );
+            $this->db->where('id_mk', $id);
+            $this->db->update('rs_matakuliah', $data); 
+        }else
+        {
+            echo 'nggak ada data';
+        }
     }
 }
 
