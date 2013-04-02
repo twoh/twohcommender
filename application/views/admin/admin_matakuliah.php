@@ -15,9 +15,7 @@
             </h3>
 
 
-            <div class="" id="insertMK" toggle="no">
-
-            </div>
+            
             <div id="dataMK">
                 <table class="table table-hover">
                     <thead>
@@ -36,15 +34,15 @@
                             <tr>
                                 <td><span class="label label-inverse"><?php echo $mks->id_mk; ?></span></td>
                                 <td><?php echo $mks->nama_mk;
-                        ?></td>
+                            ?></td>
                                 <td><?php echo $mks->deskripsi;
-                        ?></td>
+                            ?></td>
                                 <td>
                                     <?php echo $mks->sks;
                                     ?>      
                                 </td>
                                 <td><?php echo $mks->kelompok_keahlian;
-                                ?></td>
+                                    ?></td>
                                 <td>                
                                     <div class="btn-group">
                                         <a class="btn btn-small btn-info dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-book icon-white"></i><span class="caret"></span></a>
@@ -64,11 +62,12 @@
                 </div>
             </div>
         </div>
+        <div class="span4" id="insertMK" toggle="no">
 
+        </div>
     </div> <!--row-->
     <script>
         function insertMK(event){
-            $("#insertMK").slideToggle();
             if($("#insertMK").attr("toggle")=="no")
             {
                 $("#insertMK").load("<?php echo base_url() ?>admin/insert_mk.twh");
@@ -112,7 +111,7 @@
             $("#insertMK").load("<?php echo base_url() ?>admin/delete_mk.twh",{
                 edit_mk: $("#fieldEdit"+$id_mk).val()
             });
-            $("#dataMK").load("<?php echo base_url().'admin/lihat_mk'?> #dataMK");
+            $("#dataMK").load("<?php echo base_url() . 'admin/lihat_mk' ?> #dataMK");
             event.preventDefault();
         
         }

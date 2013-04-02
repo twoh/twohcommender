@@ -7,5 +7,5 @@
 ?>
 <div class="alert alert-success">
   <button type="button" class="close" data-dismiss="alert">&times;</button>
-  <strong>Berhasil</strong> Data telah dihapus.
+  <strong>Berhasil</strong> Data Mata Kuliah telah dihapus.
 </div>

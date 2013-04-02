@@ -17,7 +17,7 @@
 				{
                         if(($this->session->userdata('user_name')!=""))
                         {
-                           $this->welcome();
+                           redirect('user/welcome');
                         }
                         else{
                            $this->load->view('login');
@@ -33,18 +33,20 @@
                       //echo $email;
                       if($result) 
                       {
-                          $this->welcome();
+                          redirect('user/welcome');
+                          //$this->welcome();
                         //  echo 'login here';
-                      
                       }
-                      else        $this->index();
+                      else        
+                          $this->index();
                 }
                 
+                /*
                 public function welcome()
                 {
                       $this->load->view('header');
-                      $this->load->view('user/welcome');
+                      $this->load->view('user/index');
                       $this->load->view('footer');
-                }
+                }*/
         }
 ?>

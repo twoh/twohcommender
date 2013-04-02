@@ -76,15 +76,24 @@ class Model_admin extends CI_Model{
     
     function get_mk_paging($limit, $start)
     {
+        //function untuk mengambil paging mata kuliah
         $this->db->limit($limit, $start);
         $query = $this->db->get('rs_matakuliah');
+        return $query;
+    }
+    
+    function get_user_paging($limit, $start)
+    {
+        //function untuk mengambil paging pengguna
+        $this->db->limit($limit, $start);
+        $query = $this->db->get('rs_user');
         return $query;
     }
     
     function update_mk()
     {
         $id = $this->input->post('idmk');
-        echo 'id = '.$id;
+        //echo 'id = '.$id;
         if($id!=NULL)
         {
             $data = array(
@@ -95,6 +104,24 @@ class Model_admin extends CI_Model{
             );
             $this->db->where('id_mk', $id);
             $this->db->update('rs_matakuliah', $data); 
+        }else
+        {
+            echo 'nggak ada data';
+        }
+    }
+    
+    function update_user()
+    {
+        $id = $this->input->post('id_user');
+        echo 'id = '.$id;
+        if($id!=NULL)
+        {
+            $data = array(
+            'user_name'=>$this->input->post('username'),
+            'email'=>$this->input->post('email'),
+            );
+            $this->db->where('id_user', $id);
+            $this->db->update('rs_user', $data); 
         }else
         {
             echo 'nggak ada data';

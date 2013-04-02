@@ -1,0 +1,18 @@
+<?php
+
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+    
+?>
+
+<div class="row">
+    <div class="span8">
+        <p>
+            Di halaman ini Anda bisa melihat rating terhadap mata kuliah yang pernah diambil.
+        </p>
+        <a class="btn" href="<?php echo base_url().'user/lihat_rating.twh'?>">Lihat Rating Matakuliah</a>
+    </div>
+    
+</div>

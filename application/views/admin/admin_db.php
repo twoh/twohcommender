@@ -8,19 +8,19 @@
                 <p>
                     Admin :<span class="label label-info"><?php print_r($this->session->userdata('user_name'))?></span>
                     <?php
-            $data = array(
-                'name' => 'logout',
-                'id' => 'logout',
-                'class' => 'btn btn-small btn-danger pull-right'
-            );
-            echo anchor('admin/logout', 'Log Out', $data);
-            ?>
+                    $data = array(
+                        'name' => 'logout',
+                        'id' => 'logout',
+                        'class' => 'btn btn-small btn-danger pull-right'
+                    );
+                    echo anchor('admin/logout', 'Log Out', $data);
+                    ?>
                 
                 </p>
                 
             </div>
     </div>      
-    </div>
+</div>
             
         
     

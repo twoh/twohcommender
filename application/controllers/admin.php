@@ -77,8 +77,7 @@ class Admin extends CI_Controller {
     function data_pengguna() {
         //Melihat data pengguna
         if (($this->session->userdata('user_name') == "herdi")) {
-            $data['user'] = $this->model_admin->get_all_user();
-            $this->load->view('admin/admin_pengguna', $data);
+            $this->load->view('admin/admin_pg');
         }else
             $this->login();
     }
@@ -92,6 +91,50 @@ class Admin extends CI_Controller {
             $this->login();
     }
 
+     public function lihat_mk() {
+        if (($this->session->userdata('user_name') == "herdi")) {
+        //MELIHAT DATA MATA KULIAH <PAGING VERSION>
+        $string_query = "select * from rs_matakuliah";
+        $query = $this->db->query($string_query);
+        $config = array();
+        $config['total_rows'] = $query->num_rows();
+        $config['per_page'] = '7';
+        $config['uri_segment'] = 3;
+        $config['num_links'] = 2;
+        $config['base_url'] = base_url() . 'admin/lihat_mk';
+        $config['full_tag_open'] = '<ul>';
+        $config['full_tag_close'] = '</ul>';
+        $config['first_tag_open'] = '<li>';
+        $config['first_tag_close'] = '</li>';
+        $config['num_tag_open'] = '<li>';
+        $config['num_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="disabled"><a>';
+        $config['cur_tag_close'] = '</a></li>';
+        $config['prev_tag_open'] = '<li>';
+        $config['prev_tag_close'] = '</li>';
+        $config['next_tag_open'] = '<li>';
+        $config['next_tag_close'] = '</li>';
+        $config['last_tag_open'] = '<li>';
+        $config['last_tag_close'] = '</li>';
+        $this->pagination->initialize($config);
+        //$num = $config['per_page'];
+        $offset = $this->uri->segment(3);
+
+        //$offset = ( ! is_numeric($offset) || $offset < 1) ? 0 : $offset; 
+        if (empty($offset)) {
+            $offset = 0;
+        }
+
+        $data['results'] = $this->model_admin->get_mk_paging($config['per_page'], $offset);
+        $data['links'] = $this->pagination->create_links();
+        $this->load->view('header');
+        $this->load->view('admin/admin_matakuliah', $data);
+        $this->load->view('footer');
+        }
+        else
+            $this->login ();
+    }
+    
     function insert_mk() {
         //Meload Halaman Insert Mata Kuliah
         if (($this->session->userdata('user_name') == "herdi"))
@@ -102,24 +145,6 @@ class Admin extends CI_Controller {
 
     function edit_mk() {
         //Meload Halaman edit mata kuliah
-        if (($this->session->userdata('user_name') == "herdi")) {
-            $id = $this->input->post('edit_mk');
-            //echo 'IDE SAMA DENGAN'.$id;
-            $this->db->where('id_mk', $id);
-            $query = $this->db->get("rs_matakuliah");
-            if ($query->num_rows() > 0) {
-                $data['mk'] = $query;
-                $this->load->view('admin/edit/mata_kuliah', $data);
-            } else {
-                echo 'dataempty';
-            }
-        }
-        else
-            $this->login();
-    }
-    
-    function edit_user() {
-        //Meload Halaman edit pengguna
         if (($this->session->userdata('user_name') == "herdi")) {
             $id = $this->input->post('edit_mk');
             //echo 'IDE SAMA DENGAN'.$id;
@@ -177,15 +202,21 @@ class Admin extends CI_Controller {
         }
     }
 
-    function delete_mk()
-    {
+    function delete_mk() {
         //fungsi untuk menghapus mata kuliah
         $id = $this->input->post('edit_mk');
         $this->db->where('id_mk', $id);
-        $this->db->delete('rs_matakuliah'); 
+        $this->db->delete('rs_matakuliah');
         $this->load->view('admin/delete/mata_kuliah');
     }
-
+    
+    function delete_user() {
+        //fungsi untuk menghapus mata kuliah
+        $id = $this->input->post('edit_user');
+        $this->db->where('id_user', $id);
+        $this->db->delete('rs_user');
+        $this->load->view('admin/delete/pengguna');
+    }
 
     function insert_user() {
         //Meload Halaman Insert User
@@ -195,6 +226,41 @@ class Admin extends CI_Controller {
             $this->login();
     }
 
+    function edit_user() {
+        //Meload Halaman edit pengguna
+        if (($this->session->userdata('user_name') == "herdi")) {
+            $id = $this->input->post('edit_user');
+            //echo 'IDE SAMA DENGAN'.$id;
+            $this->db->where('id_user', $id);
+            $query = $this->db->get("rs_user");
+            if ($query->num_rows() > 0) {
+                $data['users'] = $query;
+                $this->load->view('admin/edit/pengguna', $data);
+            } else {
+                echo 'dataempty';
+            }
+        }
+        else
+            $this->login();
+    }
+    
+    function do_edit_user() {
+        //Melakukan update mata kuliah
+        $this->load->library('form_validation');
+        $this->form_validation->set_error_delimiters('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">×</button>', '</div>');
+        $this->form_validation->set_rules('username', 'User Name', 'trim|required|min_length[4]|xss_clean');
+        $this->form_validation->set_rules('email', 'Your Email', 'trim|required|valid_email');
+        if ($this->form_validation->run() == FALSE) {
+//            echo 'salaaah';
+            redirect('admin/lihat_pengguna');
+        } else {
+            $this->model_admin->update_user();
+            redirect('admin/lihat_pengguna');
+//            echo 'sukses';
+//            echo 'dijalankan';
+        }
+    }
+    
     public function do_insert_user() {
         //Melakukan insert user
         $this->load->library('form_validation');
@@ -203,50 +269,54 @@ class Admin extends CI_Controller {
         $this->form_validation->set_rules('email_address', 'Your Email', 'trim|required|valid_email');
         $this->form_validation->set_rules('password', 'Password', 'trim|required|min_length[4]|max_length[32]');
         if ($this->form_validation->run() == FALSE) {
-            redirect('admin/index');
+            redirect('admin/lihat_pengguna');
         } else {
             $this->model_admin->insert_user();
-            redirect('admin/index');
+            redirect('admin/lihat_pengguna');
         }
     }
 
-    public function lihat_mk() {
-        //MELIHAT DATA MATA KULIAH <PAGING VERSION>
-        $string_query = "select * from rs_matakuliah";
-        $query = $this->db->query($string_query);
-        $config = array();
-        $config['total_rows'] = $query->num_rows();
-        $config['per_page'] = '5';
-        $config['uri_segment'] = 3;
-        $config['num_links'] = 2;
-        $config['base_url'] = base_url() . 'admin/lihat_mk';
-        $config['full_tag_open'] = '<ul>';
-        $config['full_tag_close'] = '</ul>';
-        $config['first_tag_open'] = '<li>';
-        $config['first_tag_close'] = '</li>';
-        $config['num_tag_open'] = '<li>';
-        $config['num_tag_close'] = '</li>';
-        $config['cur_tag_open'] = '<li class="disabled"><a>';
-        $config['cur_tag_close'] = '</a></li>';
-        $config['prev_tag_open'] = '<li>';
-        $config['prev_tag_close'] = '</li>';
-        $config['next_tag_open'] = '<li>';
-        $config['next_tag_close'] = '</li>';
-        $config['last_tag_open'] = '<li>';
-        $config['last_tag_close'] = '</li>';
-        $this->pagination->initialize($config);
-        //$num = $config['per_page'];
-        $offset = $this->uri->segment(3);
+    public function lihat_pengguna() {
+        if (($this->session->userdata('user_name') == "herdi")) {
+            //MELIHAT DATA PENGGUNA <PAGING VERSION>
+            $string_query = "select * from rs_user";
+            $query = $this->db->query($string_query);
+            $config = array();
+            $config['total_rows'] = $query->num_rows();
+            $config['per_page'] = '5';
+            $config['uri_segment'] = 3;
+            $config['num_links'] = 2;
+            $config['base_url'] = base_url() . 'admin/lihat_pengguna';
+            $config['full_tag_open'] = '<ul>';
+            $config['full_tag_close'] = '</ul>';
+            $config['first_tag_open'] = '<li>';
+            $config['first_tag_close'] = '</li>';
+            $config['num_tag_open'] = '<li>';
+            $config['num_tag_close'] = '</li>';
+            $config['cur_tag_open'] = '<li class="disabled"><a>';
+            $config['cur_tag_close'] = '</a></li>';
+            $config['prev_tag_open'] = '<li>';
+            $config['prev_tag_close'] = '</li>';
+            $config['next_tag_open'] = '<li>';
+            $config['next_tag_close'] = '</li>';
+            $config['last_tag_open'] = '<li>';
+            $config['last_tag_close'] = '</li>';
+            $this->pagination->initialize($config);
+            //$num = $config['per_page'];
+            $offset = $this->uri->segment(3);
 
-        //$offset = ( ! is_numeric($offset) || $offset < 1) ? 0 : $offset; 
-        if (empty($offset)) {
-            $offset = 0;
+            //$offset = ( ! is_numeric($offset) || $offset < 1) ? 0 : $offset; 
+            if (empty($offset)) {
+                $offset = 0;
+            }
+            $data['results'] = $this->model_admin->get_user_paging($config['per_page'], $offset);
+            $data['links'] = $this->pagination->create_links();
+            $this->load->view('header');
+            $this->load->view('admin/admin_pengguna', $data);
+            $this->load->view('footer');
         }
-        $data['results'] = $this->model_admin->get_mk_paging($config['per_page'], $offset);
-        $data['links'] = $this->pagination->create_links();
-        $this->load->view('header');
-        $this->load->view('admin/admin_matakuliah', $data);
-        $this->load->view('footer');
+        else
+            $this->login();
     }
 
 }

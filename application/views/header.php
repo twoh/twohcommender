@@ -35,9 +35,13 @@
 }
     </style>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+
+
 <title>Herdi Recommender System</title>
 </head>
 <body >
+    
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container-fluid">

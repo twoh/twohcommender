@@ -44,6 +44,30 @@ class Model_user extends CI_Model{
             return false;
         }
     }
+    
+    public function insert_rating()
+    {
+        echo $this->input->post('idmk');
+        echo $this->input->post('komentar');
+        echo $this->input->post('test-4-rating-3');
+        echo $this->input->post('iduser');
+        
+        $data=array(
+            'id_mk'=>$this->input->post('idmk'),
+            'review'=>$this->input->post('komentar'),
+            'rating'=>$this->input->post('test-4-rating-3'),
+            'id_user'=>$this->input->post('iduser')
+        );
+        $this->db->insert('rs_review',$data);
+    }
+    
+    function get_rating_paging($limit, $start)
+    {
+        //function untuk mengambil paging mata kuliah
+        $string_query = "SELECT `nama_mk`, `rating`, `review` FROM `rs_review`,`rs_matakuliah` WHERE `rs_review`.`id_mk` = `rs_matakuliah`.`id_mk` LIMIT ".$start.", ".$limit;
+        $query = $this->db->query($string_query);
+        return $query;
+    }
 }
 
 ?>
