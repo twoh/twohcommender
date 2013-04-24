@@ -166,7 +166,7 @@ class Admin extends CI_Controller {
         $this->load->library('form_validation');
         $this->form_validation->set_rules('namamk', 'Nama Matakuliah', 'trim|required|min_length[4]|xss_clean|max_length[75]');
         $this->form_validation->set_rules('sks', 'SKS', 'trim|required|min_length[1]|max_length[1]');
-        $this->form_validation->set_rules('deskripsi', 'Deskripsi MK', 'trim|required|min_length[0]|max_length[140]');
+        $this->form_validation->set_rules('deskripsi', 'Deskripsi MK', 'trim|required|min_length[0]|max_length[1400]');
         $this->form_validation->set_rules('kk', 'Kelompok Keahlian', 'trim|required|min_length[3]|max_length[4]');
         if ($this->form_validation->run() == FALSE) {
 //            echo 'salaaah';
@@ -283,7 +283,7 @@ class Admin extends CI_Controller {
             $query = $this->db->query($string_query);
             $config = array();
             $config['total_rows'] = $query->num_rows();
-            $config['per_page'] = '5';
+            $config['per_page'] = '10';
             $config['uri_segment'] = 3;
             $config['num_links'] = 2;
             $config['base_url'] = base_url() . 'admin/lihat_pengguna';
@@ -317,6 +317,37 @@ class Admin extends CI_Controller {
         }
         else
             $this->login();
+    }
+    
+    function get_recommendation()
+    {
+        //Mendapatkan rekomendasi
+        require_once 'ItemBased.php';
+        $user_id = $_GET['id'];
+        $result = mysql_query(
+                "SELECT `id_user`, `rating`,`nama_mk` 
+                FROM `rs_review`,`rs_matakuliah`
+                WHERE `rs_matakuliah`.`id_mk` = `rs_review`.`id_mk` and `rating` > 0 
+                ORDER BY `rs_review`.`id_user` ASC;");
+        $ratings = array();
+        while ($row = mysql_fetch_array($result)) 
+        {
+            $userID = $row{'id_user'};
+            $ratings[$userID][$row{'nama_mk'}] =  $row{'rating'};               
+        }
+        //print_r($ratings);
+        //echo "<br>";
+        $recommend = new ItemBased();
+        $transform = $recommend->transformPreferences($ratings);                    
+        $similiarity = $recommend->generateSimilarities($transform);
+        $recom = $recommend->recommend($user_id, $transform, $similiarity,10);
+        //print_r($recom);
+        $data['recom'] = $recom;
+        $this->load->view('header');
+        $this->load->view('admin/admin_view_rekomendasi', $data);
+        $this->load->view('footer');
+
+
     }
 
 }

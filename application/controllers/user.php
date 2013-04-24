@@ -68,11 +68,11 @@
                 public function lihat_mk()
                 {
                     if (($this->session->userdata('user_name') != null)) {
-                    $string_query = "select * from rs_matakuliah";
+                    $string_query = "SELECT * FROM `rs_matakuliah` WHERE `id_mk` NOT IN (SELECT `id_mk` FROM `rs_review` WHERE `rs_review`.`id_user` = ".$this->session->userdata('user_id')." AND `rs_review`.`id_mk` = `rs_matakuliah`.`id_mk`)";
                     $query = $this->db->query($string_query);
                     $config = array();
                     $config['total_rows'] = $query->num_rows();
-                    $config['per_page'] = '5';
+                    $config['per_page'] = '10';
                     $config['uri_segment'] = 3;
                     $config['num_links'] = 2;
                     $config['base_url'] = base_url() . 'user/lihat_mk';
@@ -113,7 +113,8 @@
                 public function lihat_rating()
                 {
                     if (($this->session->userdata('user_name') != null)) {
-                        $string_query = "SELECT `nama_mk`, `rating`, `review` FROM `rs_review`,`rs_matakuliah` WHERE `rs_review`.`id_mk` = `rs_matakuliah`.`id_mk`";
+                        $userID = $this->session->userdata('user_id');
+                        $string_query = "SELECT `nama_mk`, `rating`, `review` FROM `rs_review`,`rs_matakuliah` WHERE `rs_review`.`id_mk` = `rs_matakuliah`.`id_mk` AND `rs_review`.`id_user` = ".$userID;
                         $query = $this->db->query($string_query);
                         $config = array();
                         $config['total_rows'] = $query->num_rows();
@@ -142,7 +143,7 @@
                         if (empty($offset)) {
                             $offset = 0;
                         }
-                        $data['results'] = $this->model_user->get_rating_paging($config['per_page'], $offset);
+                        $data['results'] = $this->model_user->get_rating_paging($config['per_page'], $offset,$userID);
                         $data['links'] = $this->pagination->create_links();
                         $this->load->view('header');
                         $this->load->view('user/user_view_rating', $data);
@@ -157,10 +158,18 @@
                     if (($this->session->userdata('user_name') != null)) {
                         $id = $this->input->post('edit_mk');
                         //echo 'IDE SAMA DENGAN'.$id;
-                        $this->db->where('id_mk', $id);
-                        $query = $this->db->get("rs_matakuliah");
-                        if ($query->num_rows() > 0) {
-                            $data['mk'] = $query;
+                        $this->db->where('id_mk', $id);                        
+                        $query2 = $this->db->get("rs_matakuliah");
+                        $query = mysql_query("SELECT `user_name`, `rating` FROM `rs_review`, `rs_user` WHERE rs_review.id_user != ".$this->session->userdata('user_id')." AND `rs_review`.`id_user` = `rs_user`.`id_user` AND id_mk = ".$id);                        
+                        $komentar = array();
+                        while ($row = mysql_fetch_array($query)) 
+                        {
+                            $userID = $row{'user_name'};
+                            $komentar[$userID] =  $row{'rating'};               
+                        }
+                        if ($query2->num_rows() > 0) {
+                            $data['mk'] = $query2;
+                            $data['komentar'] = $komentar;
                             $this->load->view('user/insert/rating_mk', $data);
                         } else {
                             echo 'dataempty';
@@ -183,6 +192,36 @@
                         $this->model_user->insert_rating();
                         redirect('user/lihat_mk');
                     }/**/
+                }
+                
+                function get_recommendation()
+                {
+                    //Mendapatkan rekomendasi
+                    require_once 'ItemBased.php';
+                    $result = mysql_query(
+                            "SELECT `id_user`, `rating`,`nama_mk` 
+                            FROM `rs_review`,`rs_matakuliah`
+                            WHERE `rs_matakuliah`.`id_mk` = `rs_review`.`id_mk` and `rating` > 0 
+                            ORDER BY `rs_review`.`id_user` ASC;");
+                    $ratings = array();
+                    while ($row = mysql_fetch_array($result)) 
+                    {
+                        $userID = $row{'id_user'};
+                        $ratings[$userID][$row{'nama_mk'}] =  $row{'rating'};               
+                    }
+                    //print_r($ratings);
+                    //echo "<br>";
+                    $recommend = new ItemBased();
+                    $transform = $recommend->transformPreferences($ratings);                    
+                    $similiarity = $recommend->generateSimilarities($transform);
+                    $recom = $recommend->recommend($this->session->userdata('user_id'), $transform, $similiarity,10);
+                    //print_r($recom);
+                    $data['recom'] = $recom;
+                    $this->load->view('header');
+                    $this->load->view('user/user_view_rekomendasi', $data);
+                    $this->load->view('footer');
+                    
+                    
                 }
                 
         }

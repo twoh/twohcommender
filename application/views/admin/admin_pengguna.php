@@ -31,6 +31,7 @@
                                             <li class="" id="linkEdit<?php echo $users->id_user ?>"><a href="#edit/#!/user<?php echo $users->id_user ?>" onclick="editUser(<?php echo $users->id_user ?>)"><i class="icon-pencil"></i> Edit</a></li>
                                             <li class="" id="linkDelete<?php echo $users->id_user ?>"><a href="#delete/#!/user<?php echo $users->id_user ?>" onclick="hapusUser(<?php echo $users->id_user ?>)"><i class="icon-trash"></i> Hapus</a></li>
                                             <li class="" id="linkView<?php echo $users->id_user ?>"><a href="#view/#!/user<?php echo $users->id_user ?>" onclick="viewUser(<?php echo $users->id_user ?>)"><i class="icon-file"></i> Lihat Data</a></li>
+                                            <li class="" id="linkRec<?php echo $users->id_user ?>"><a href="<?php echo base_url().'admin/get_recommendation.twh?id='.$users->id_user?>"><i class="icon-user"></i> Lihat Rekomendasi</a></li>
                                         </ul>
                                     </div>
                                 </td>

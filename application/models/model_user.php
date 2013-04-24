@@ -12,6 +12,7 @@ class Model_user extends CI_Model{
     
     public function add_user()
     {
+        //untuk menambahkan pengguna
         $data=array(
             'user_name'=>$this->input->post('user_name'),
             'email'=>$this->input->post('email_address'),
@@ -22,9 +23,10 @@ class Model_user extends CI_Model{
     
     function login($email,$password)
     {
+        //untuk login pengguna
         $this->db->where("email",$email);
         $this->db->where("user_pass",$password);
-        $query=$this->db->get("rs_user");
+        $query=$this->db->get("rs_user");        
         if($query->num_rows()>0)
         {
            foreach($query->result() as $rows)
@@ -47,6 +49,7 @@ class Model_user extends CI_Model{
     
     public function insert_rating()
     {
+        //function untuk memasukkan rating baru
         echo $this->input->post('idmk');
         echo $this->input->post('komentar');
         echo $this->input->post('test-4-rating-3');
@@ -61,10 +64,10 @@ class Model_user extends CI_Model{
         $this->db->insert('rs_review',$data);
     }
     
-    function get_rating_paging($limit, $start)
+    function get_rating_paging($limit, $start,$userID)
     {
         //function untuk mengambil paging mata kuliah
-        $string_query = "SELECT `nama_mk`, `rating`, `review` FROM `rs_review`,`rs_matakuliah` WHERE `rs_review`.`id_mk` = `rs_matakuliah`.`id_mk` LIMIT ".$start.", ".$limit;
+        $string_query = "SELECT `nama_mk`, `rating`, `review` FROM `rs_review`,`rs_matakuliah` WHERE `rs_review`.`id_mk` = `rs_matakuliah`.`id_mk` AND `rs_review`.`id_user`= ".$userID." LIMIT ".$start.", ".$limit;
         $query = $this->db->query($string_query);
         return $query;
     }

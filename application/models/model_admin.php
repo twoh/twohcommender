@@ -78,6 +78,7 @@ class Model_admin extends CI_Model{
     {
         //function untuk mengambil paging mata kuliah
         $this->db->limit($limit, $start);
+        $this->db->where('`id_mk` NOT IN (SELECT `id_mk` FROM `rs_review` WHERE `rs_review`.`id_user` = '.$this->session->userdata('user_id').' AND `rs_review`.`id_mk` = `rs_matakuliah`.`id_mk`)', NULL, FALSE);
         $query = $this->db->get('rs_matakuliah');
         return $query;
     }

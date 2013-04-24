@@ -12,7 +12,7 @@
         <p>
             Di halaman ini Anda bisa melihat rating terhadap mata kuliah yang pernah diambil.
         </p>
-        <a class="btn" href="<?php echo base_url().'user/lihat_rating.twh'?>">Lihat Rating Matakuliah</a>
+        <a class="btn" href="<?php echo base_url().'user/lihat_rating.twh'?>">Lihat Rating Matakuliah</a>                
     </div>
     
 </div>

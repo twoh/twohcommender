@@ -6,18 +6,32 @@
 	
     <?php include 'user_db.php';?>
     <div class="row">
-        <div class="span10">
-    <ul class="nav nav-pills">
+        <div class="span3">
+            <h4>Rekomendasi Mata Kuliah</h4>
+            <p>
+            Setelah Anda memberikan rating pada mata kuliah. Cek mata kuliah pilihan yang kami rekomendasikan untuk Anda.
+            </p>
+            <a class="btn btn-large btn-primary" href="<?php echo base_url().'user/get_recommendation.twh'?>" onclick="">Cek Rekomendasi</a>
+        </div>
+        <div class="span7">
+            <ul class="nav nav-pills">
                 <li id="list1" class="active">
                     <a href="#rating" onclick="sdata(1)">Mata Kuliah</a>
                 </li>
-                <li id="list2"><a href="#mk" onclick="sdata(2)">Rating</a></li>
-                <li id="list3"><a href="#pengguna" onclick="sdata(3)">Profil</a></li>
+                <li id="list2">
+                    <a href="#mk" onclick="sdata(2)">Rating</a>
+                </li>
+                <li id="list3">
+                    <a href="#pengguna" onclick="sdata(3)">Profil</a>
+                </li>
              </ul>
             <hr/>
 `       </div>
+        <div class="" id="data" ></div>
+    <div class="span3">
+            
     </div>
-    <div class="" id="data" >
+    
         
     </div>
     <script>

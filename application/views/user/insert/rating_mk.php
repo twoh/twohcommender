@@ -36,8 +36,26 @@
         echo form_open("user/do_insert_rating",$attributes); ?>
         <?php echo validation_errors(''); ?>
         <h3 name="namamk"><?php echo $mks->nama_mk?></h3>                    
-        <p><?php echo $mks->deskripsi?></p>        
-        <h5>Rating : </h5>        
+        <p><?php echo $mks->deskripsi;    
+                ?></p> 
+        <h4>Rating user lain :</h4>
+        <?php 
+        if($komentar == NULL)
+        {
+         ?>
+        <p>Belum ada rating.</p>
+             <?php   
+        }else
+        {
+        foreach ($komentar as $key => $value) {
+        ?>
+        <p><?php echo $key." memberi rating ".$value ?></p> 
+        <?php 
+            }
+        }
+        ?>
+        
+        <h4>Beri rating : </h4>        
         <div id="rating">
                 <input class="star {split:2}" type="radio" name="test-4-rating-3" value="0.5"/>
                 <input class="star {split:2}" type="radio" name="test-4-rating-3" value="1"/>
@@ -45,7 +63,7 @@
                 <input class="star {split:2}" type="radio" name="test-4-rating-3" value="2"/>
                 <input class="star {split:2}" type="radio" name="test-4-rating-3" value="2.5"/>
                 <input class="star {split:2}" type="radio" name="test-4-rating-3" value="3"/>
-                <input class="star {split:2}" type="radio" name="test-4-rating-3" value="3.5" checked="checked"/>
+                <input class="star {split:2}" type="radio" name="test-4-rating-3" value="3.5"/>
                 <input class="star {split:2}" type="radio" name="test-4-rating-3" value="4"/>
                 <input class="star {split:2}" type="radio" name="test-4-rating-3" value="4.5"/>
                 <input class="star {split:2}" type="radio" name="test-4-rating-3" value="5"/>
