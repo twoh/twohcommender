@@ -62,8 +62,7 @@ class ItemBased {
     
     public function transformPreferences($preferences)
     {
-        $result = array();
-        
+        $result = array();        
         foreach($preferences as $otherPerson => $values)
         {
             foreach($values as $key => $value)
@@ -78,7 +77,6 @@ class ItemBased {
 
     function generateSimilarities($data) {
         $similarities = array();
-
         foreach($data as $item => $scores) {
                 $similarities[$item] = array();
 
@@ -101,6 +99,74 @@ class ItemBased {
     function getSimilar($item, $similarities) {
                 $val = each($similarities[$item]);
                 return $val['key'];
+    }    
+    
+    function getUserByMK($mk)
+    {
+        $query = "SELECT id_user FROM `rs_review` WHERE id_mk = (SELECT id_mk FROM rs_matakuliah WHERE nama_mk = \"".$mk."\")";
+        $result = mysql_query($query);
+        $users = array();
+        while ($row = mysql_fetch_array($result)) 
+        {
+            $users[] = $row{'id_user'};            
+        }
+        //echo "<br> Ini pengguna";
+        //print_r($users);
+        
+        return $users;
+    }
+    
+    function getRatingByUserMK($user,$mk)
+    {
+        $query = "SELECT rating FROM `rs_review` WHERE id_mk = (SELECT id_mk FROM rs_matakuliah WHERE nama_mk = \"".$mk."\") AND id_user = ".$user;
+        $result = mysql_query($query);
+        $ratings = mysql_fetch_array($result);
+        $rating = $ratings{'rating'};
+        return $rating;
+    }
+    
+    function accuration($user, $data, $similarities, $mk) {
+        error_reporting(E_ALL ^ (E_NOTICE | E_WARNING));
+        $out = array();
+        $items = array();
+        $sims = array();
+        /*Mencari item yang telah dirating oleh pengguna
+         * dan memasukkannya ke dalam array items[]
+         */
+        foreach($data as $item => $scores) {
+                if(isset($scores[$user])) {
+                    if($item == $mk)
+                    {
+                        continue;
+                    }else
+                    {
+                        $items[$item] = $scores[$user];
+                    }
+                }
+        }
+        //print_r($items);
+        foreach($items as $item => $score) {
+            foreach($similarities[$item] as $sim_item => $sim) {                    
+               // echo "<br>";
+                //echo $sim_item." ".$sim." ".$item;
+                if(isset($items[$sim_item])) {
+                        continue; // they already rated this
+                }
+
+                if(!array_key_exists($sim_item,$out)) {
+   /*error*/                     $out[$sim_item] == 0;
+                }
+  /*error*/             $out[$sim_item] += $sim * $score;                                                                                          
+  /*error*/             $sims[$sim_item] += $sim;
+                }
+        }
+        
+        foreach($out as $item => $score) {
+                $out[$item] = $score / $sims[$item];
+        }
+
+        arsort($out);
+        return $out[$mk]; // return top n
     }
     
     function recommend($user, $data, $similarities, $top) {
@@ -108,18 +174,19 @@ class ItemBased {
         $out = array();
         $items = array();
         $sims = array();
-        
+        /*Mencari item yang telah dirating oleh pengguna
+         * dan memasukkannya ke dalam array items[]
+         */
         foreach($data as $item => $scores) {
                 if(isset($scores[$user])) {
                         $items[$item] = $scores[$user];
                 }
         }
-        
+        print_r($items);
         foreach($items as $item => $score) {
-                foreach($similarities[$item] as $sim_item => $sim) {
-                    
-                        //echo "<br>";
-                        //echo $sim_item." ".$sim." ".$item;
+                foreach($similarities[$item] as $sim_item => $sim) {                    
+                        echo "<br>";
+                        echo $sim_item." ".$sim." ".$item;
                         if(isset($items[$sim_item])) {
                                 continue; // they already rated this
                         }

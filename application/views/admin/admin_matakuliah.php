@@ -20,7 +20,7 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>#ID</th>
+                            <th>#KODE</th>
                             <th>MK</th>
                             <th>Deskripsi</th>
                             <th>SKS</th>
@@ -32,7 +32,7 @@
                         <?php foreach ($results->result() as $mks):
                             ?>
                             <tr>
-                                <td><span class="label label-inverse"><?php echo $mks->id_mk; ?></span></td>
+                                <td><span class="label label-inverse"><?php echo $mks->kode_mk; ?></span></td>
                                 <td><?php echo $mks->nama_mk;
                             ?></td>
                                 <td><?php echo $mks->deskripsi;

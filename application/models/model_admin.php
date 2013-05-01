@@ -101,6 +101,8 @@ class Model_admin extends CI_Model{
             'nama_mk'=>$this->input->post('namamk'),
             'sks'=>$this->input->post('sks'),
             'deskripsi'=>$this->input->post('deskripsi'),
+            'jenis_mk'=>$this->input->post('jenismk'),
+            'kode_mk'=>$this->input->post('kodemk'),
             'kelompok_keahlian'=>$this->input->post('kk')
             );
             $this->db->where('id_mk', $id);

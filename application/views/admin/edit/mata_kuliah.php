@@ -14,6 +14,8 @@
         <?php echo validation_errors(''); ?>
             <input type="text" class="input-block-level" name="idmk" value="<?php echo $mks->id_mk?>" readonly="readonly"/>
             <input type="text" class="input-block-level" name="namamk" value="<?php echo $mks->nama_mk?>"/>
+            <input type="text" class="input-block-level" name="kodemk" value="<?php echo $mks->kode_mk?>"/>
+            <input type="text" class="input-block-level" name="jenismk" value="<?php echo $mks->jenis_mk?>"/>
             <input type="text" class="input-block-level" name="sks" value="<?php echo $mks->sks?>"/>
             <textarea rows="3" class="input-block-level" name="deskripsi"><?php echo $mks->deskripsi?></textarea>
             <input type="text" class="input-block-level" name="kk" value="<?php echo $mks->kelompok_keahlian?>"/>
