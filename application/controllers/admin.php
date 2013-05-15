@@ -319,6 +319,74 @@ class Admin extends CI_Controller {
             $this->login();
     }
     
+    function test_accuration()
+    {                                        
+        require_once 'ItemBased.php';
+        // tempat menyimpan hasil rating sistem
+        $system_ratings = array();
+        $actual_ratings = array();
+        $total = 0;
+        $mk = "Data Mining";
+        $result = mysql_query(
+                "SELECT `id_user`, `rating`,`nama_mk` 
+                FROM `rs_review`,`rs_matakuliah`
+                WHERE `rs_matakuliah`.`id_mk` = `rs_review`.`id_mk` and `rating` > 0 
+                ORDER BY `rs_review`.`id_user` ASC;");
+        $ratings = array();
+        while ($row = mysql_fetch_array($result)) 
+        {
+            $userID = $row{'id_user'};
+            $ratings[$userID][$row{'nama_mk'}] =  $row{'rating'};               
+        }
+        //print_r($ratings);
+        //echo "<br>";
+        $recommend = new ItemBased();
+        $transform = $recommend->transformPreferences($ratings);                    
+        $similiarity = $recommend->generateSimilarities($transform);
+        //$recom = $recommend->recommend(13, $transform, $similiarity,10);                                        
+        $users = $recommend->getUserByMK($mk);
+
+        $jumlah_user = count($users);
+
+        for($i = 0; $i < $jumlah_user; $i++)
+        {
+            $system_ratings[$users[$i]] = $recommend->accuration($users[$i], $transform, $similiarity,$mk);
+        }
+
+        for($i = 0; $i < $jumlah_user; $i++)
+        {
+            $actual_ratings[$users[$i]] = $recommend->getRatingByUserMK($users[$i], $mk);
+        }
+        for($i = 0; $i < $jumlah_user; $i++)
+        {
+            //echo $total."<br>";
+            $total += abs($system_ratings[$users[$i]] - $actual_ratings[$users[$i]]);                        
+        }
+
+        $accuration = $total / $jumlah_user;
+
+        $data['accuration'] = $accuration;
+        $data['aktual'] = $actual_ratings;
+        $data['prediksi'] = $system_ratings;
+        $data['mk'] = $mk;
+        $this->load->view('header');
+        $this->load->view('admin/admin_view_accuration', $data);
+        $this->load->view('footer');
+        /*echo "<br>Mata kuliah : <br>";
+        print_r($mk);
+        echo "<br>Sistem rating<br>";
+        print_r($system_ratings);
+        echo "<br>Aktual rating<br>";
+        print_r($actual_ratings);
+        echo "<br>Akurasi sistem<br>";
+        print_r($accuration);*/
+
+        //$data['recom'] = $recom;
+        //$this->load->view('header');
+        //$this->load->view('user/user_view_rekomendasi', $data);
+        //$this->load->view('footer');
+    }
+    
     function get_recommendation()
     {
         //Mendapatkan rekomendasi
@@ -346,8 +414,6 @@ class Admin extends CI_Controller {
         $this->load->view('header');
         $this->load->view('admin/admin_view_rekomendasi', $data);
         $this->load->view('footer');
-
-
     }
 
 }
