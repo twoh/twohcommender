@@ -10,7 +10,9 @@ and open the template in the editor.
     </head>
     <body>
         <?php
+        error_reporting(E_ALL ^ (E_NOTICE | E_WARNING));
         include "ContentBased.php";
+
         //document yang sebagai percobaan        
         /* $D[0] = "this is a different short string that not as short";
           $D[1] = "this string is a short string but a good string";
@@ -35,24 +37,38 @@ and open the template in the editor.
           $ir->getTfidf($result[$j],$collection);
           }
          */
-        $query = array('short', 'string');
+
+        
+        //this string is a short string but a good string
+        $query = array('this', 'string','is','a','but','good', 'short','string', 'string');
         $ir = new ContentBased();
-        $index = $ir->getIndexCol();
+        $index = $ir->getIndexTest();
         $matchDocs = array();
         $docCount = count($index['docCount']);
 
         foreach ($query as $qterm) {
             $entry = $index['dictionary'][$qterm];
+            //echo $entry['dictionary'][$qterm];
             foreach ($entry['postings'] as $docID => $posting) {
+                //if(!isset($matchDocs[$docID]))
                 $matchDocs[$docID] +=
                         $posting['tf'] *
                         log($docCount + 1 / $entry['df'] + 1, 2);
+                echo $qterm . "<br>";
+                echo "DocID : $docID tf :" . $posting['tf'] . " entry df " . $entry['df'] . " matchDocs : " . $matchDocs[$docID] . "<br>";
             }
         }
-        print_r($matchDocs);
-// length normalise
+        
+         
+        
+        $matchDocs2= $ir->normalise($matchDocs);
+        
+        
+        print_r($matchDocs2);
+        // length normalise
         foreach ($matchDocs as $docID => $score) {
             $matchDocs[$docID] = $score / $index['docCount'][$docID];
+            echo "doccount: $docCount docID: $docID score : $score index : " . $index['docCount'][$docID] . "<br>";
         }
 
         arsort($matchDocs); // high to low

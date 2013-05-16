@@ -215,7 +215,7 @@ class User extends CI_Controller {
         //Mendapatkan rekomendasi
         require_once 'ContentBased.php';
         //print_r($ratings);
-        
+
         $recommend = new ContentBased();
         //$index = $recommend->getIndexCol();
         $query = $recommend->getHistory();
@@ -225,28 +225,29 @@ class User extends CI_Controller {
 
         foreach ($query as $qterm) {
             $entry = $index['dictionary'][$qterm];
-
+            echo $entry['dictionary'][$qterm];
             if (is_array($entry['postings'])) {
                 foreach ($entry['postings'] as $docID => $posting) {
-                    if(!isset($matchDocs[$docID]))
+                    //if(!isset($matchDocs[$docID]))
                     $matchDocs[$docID] +=
                             $posting['tf'] *
                             log($docCount + 1 / $entry['df'] + 1, 2);
                 }
             }
-        }
+        }        
+
         echo "<br>hasil<br>";
-        //print_r($matchDocs);
         // length normalise
-        foreach ($matchDocs as $docID => $score) {
-            
-            $matchDocs[$docID] = $score / $index['docCount'][$docID];
-            echo "docID: $docID score : $score index : ".$index['docCount'][$docID]."<br>";
-        }
+        $matchDocs2 = $recommend->normalise($matchDocs);
+        //print_r($matchDocs2);
+        /*print_r($matchDocs);
+        foreach ($matchDocs2 as $docID => $score) {
+            $matchDocs2[$docID] = $score / $index['docCount'][$docID];
+            echo "doccount: $docCount docID: $docID score : $score index : " . $index['docCount'][$docID] . " matchDocs: " . $matchDocs2[$docID] . "<br>";
+        }*/
 
-        arsort($matchDocs); // high to low
-
-        var_dump($matchDocs);
+        arsort($matchDocs2); // high to low
+        var_dump($matchDocs2);
     }
 
 }

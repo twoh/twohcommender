@@ -27,9 +27,50 @@ class ContentBased {
         $joint = implode(" ", $historyMK);
         $merge = explode(" ", $joint);          
         $queryMK = array_values(array_unique($merge));
-        print_r($queryMK);
+        //print_r($queryMK);
         return $queryMK;
     }
+    
+    function normalise($doc) {
+        foreach($doc as $entry) {
+                $total += $entry*$entry;
+        }
+        $total = sqrt($total);
+        foreach($doc as &$entry) {
+                $entry = $entry/$total;
+        }
+        return $doc;
+    }
+    
+    function getIndexTest() {
+        $collection = array(
+                1 => 'this string is a short string but a good string',
+                2 => 'this one isn\'t quite like the rest but is here',
+                3 => 'this is a different short string that\' not as short'
+        );
+
+        $dictionary = array();
+        $docCount = array();
+
+        foreach($collection as $docID => $doc) {
+                $terms = explode(' ', $doc);
+                $docCount[$docID] = count($terms);
+
+                foreach($terms as $term) {
+                        if(!isset($dictionary[$term])) {
+                                $dictionary[$term] = array('df' => 0, 'postings' => array());
+                        }
+                        if(!isset($dictionary[$term]['postings'][$docID])) {
+                                $dictionary[$term]['df']++;
+                                $dictionary[$term]['postings'][$docID] = array('tf' => 0);
+                        }
+
+                        $dictionary[$term]['postings'][$docID]['tf']++;
+                }
+        }
+
+        return array('docCount' => $docCount, 'dictionary' => $dictionary);
+}
 
     function getIndex($collection) {
 
@@ -67,7 +108,7 @@ class ContentBased {
         $result = mysql_query($string_query)or die("<br/><br/>".mysql_error());
         $collection = array();
         while ($row = mysql_fetch_array($result)) {
-            $mkID = $row{'id_mk'};
+            $mkID = $row{'nama_mk'};
             $collection[$mkID] = $row{'deskripsi'};
         }
         //print_r($collection);
@@ -109,17 +150,7 @@ class ContentBased {
             echo "doesnt exists <br>";
         }
     }
-
-    function normalise($doc) {
-        foreach ($doc as $entry) {
-            $total += $entry * $entry;
-        }
-        $total = sqrt($total);
-        foreach ($doc as &$entry) {
-            $entry = $entry / $total;
-        }
-        return $doc;
-    }
+    
 
 }
 
