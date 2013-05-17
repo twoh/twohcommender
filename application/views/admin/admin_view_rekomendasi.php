@@ -10,7 +10,7 @@
     <div class="row-fluid">
         <div class="span6">
             <h3>
-                <a class="btn" href="<?php echo base_url() . 'admin/lihat_pengguna.twh' ?>" ><i id="back" class="icon-backward"></i></a>
+                <a class="btn" href="javascript:javascript:history.go(-1)" ><i id="back" class="icon-backward"></i></a>
                 Daftar Rekomendasi Mata Kuliah Pilihan                 
             </h3>
             <div id="dataMK">

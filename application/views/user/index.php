@@ -9,9 +9,14 @@
         <div class="span3">
             <h4>Rekomendasi Mata Kuliah</h4>
             <p>
+            <h5>Berdasarkan Rating</h5>
             Setelah Anda memberikan rating pada mata kuliah. Cek mata kuliah pilihan yang kami rekomendasikan untuk Anda.
             </p>
             <a class="btn btn-large btn-primary" href="<?php echo base_url().'user/get_recommendation.twh'?>" onclick="">Cek Rekomendasi</a>
+            <h5>Berdasarkan Histori Nilai</h5>
+            Atau Anda dapat menggunakan histori nilai MK Wajib untuk mendapatkan rekomendasi mata kuliah pilihan untuk Anda.
+            </p>
+            <a class="btn btn-large btn-info" href="<?php echo base_url().'user/get_cb_recommendation.twh'?>" onclick="">Cek Rekomendasi</a>
         </div>
         <div class="span7">
             <ul class="nav nav-pills">

@@ -6,35 +6,41 @@
  */
 ?>
 <div class="container-fluid">
-    <?php include 'user_db.php'; ?>
+    <?php include 'admin_db.php'; ?>
     <div class="row-fluid">
         <div class="span6">
             <h3>
-                <a class="btn" href="<?php echo base_url() . 'user/welcome/' ?>" ><i id="back" class="icon-backward"></i></a>
-                Daftar Rekomendasi Mata Kuliah Pilihan diambil dari rating.                
+                <a class="btn" href="javascript:javascript:history.go(-1)" ><i id="back" class="icon-backward"></i></a>
+                Daftar Rating MK Pilihan yang telah dirating user <?php echo $_GET['id']; ?>
             </h3>
             <div id="dataMK">
                 <table class="table table-hover">
                     <thead>
                         <tr>
                             <th>Nama MK</th>
-                            <th>Prediksi Rating</th>                                                                                
+                            <th>Rating</th>
+                            <th>Review</th>                                                        
                         </tr>
                     </thead>
                     <tbody>
-                        <?php 
-                        
-                        foreach ($recom as $key => $value):
+                        <?php foreach ($results->result() as $mks):
                             ?>
                             <tr>                                
-                                <td><?php echo $key;
+                                <td><?php echo $mks->nama_mk;
                             ?></td>
-                                <td><?php echo $value;
-                            ?></td>                                                                                 
+                                <td><?php echo $mks->rating;
+                            ?></td>
+                                <td>
+                                    <?php echo $mks->review;
+                                    ?>      
+                                </td>                                                                
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
-                </table>                
+                </table>
+                <div class="pagination">
+                    <?php echo $links; ?>
+                </div>
             </div>
         </div>
         <div class="span4" id="insertMK" toggle="no">

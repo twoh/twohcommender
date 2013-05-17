@@ -10,27 +10,30 @@
     <div class="row-fluid">
         <div class="span6">
             <h3>
-                <a class="btn" href="<?php echo base_url() . 'user/welcome/' ?>" ><i id="back" class="icon-backward"></i></a>
-                Daftar Rekomendasi Mata Kuliah Pilihan diambil dari rating.                
+                <a class="btn" href="javascript:javascript:history.go(-1)" ><i id="back" class="icon-backward"></i></a>
+                Histori Nilai User <?php $this->session->userdata('user_id') ?>
             </h3>
             <div id="dataMK">
                 <table class="table table-hover">
                     <thead>
                         <tr>
+                            <th>Kode MK</th>
                             <th>Nama MK</th>
-                            <th>Prediksi Rating</th>                                                                                
+                            <th>Nilai</th>                                                        
                         </tr>
                     </thead>
                     <tbody>
-                        <?php 
-                        
-                        foreach ($recom as $key => $value):
+                        <?php foreach ($results->result() as $mks):
                             ?>
                             <tr>                                
-                                <td><?php echo $key;
+                                <td><?php echo $mks->kode_mk;
                             ?></td>
-                                <td><?php echo $value;
-                            ?></td>                                                                                 
+                                <td><?php echo $mks->nama_mk;
+                            ?></td>
+                                <td>
+                                    <?php echo $mks->nilai;
+                                    ?>      
+                                </td>                                                                
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

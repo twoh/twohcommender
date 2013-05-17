@@ -103,7 +103,8 @@ class User extends CI_Controller {
             redirect("login/index");
     }
 
-    public function lihat_rating() {
+    public function lihat_rating() {        
+        // Melihat data rating
         if (($this->session->userdata('user_name') != null)) {
             $userID = $this->session->userdata('user_id');
             $string_query = "SELECT `nama_mk`, `rating`, `review` FROM `rs_review`,`rs_matakuliah` WHERE `rs_review`.`id_mk` = `rs_matakuliah`.`id_mk` AND `rs_review`.`id_user` = " . $userID;
@@ -146,6 +147,7 @@ class User extends CI_Controller {
     }
 
     public function addRating() {
+        // menambah data Rating
         if (($this->session->userdata('user_name') != null)) {
             $id = $this->input->post('edit_mk');
             //echo 'IDE SAMA DENGAN'.$id;
@@ -215,11 +217,11 @@ class User extends CI_Controller {
         //Mendapatkan rekomendasi
         require_once 'ContentBased.php';
         //print_r($ratings);
-
+        $userID = $this->session->userdata('user_id');
         $recommend = new ContentBased();
         //$index = $recommend->getIndexCol();
-        $query = $recommend->getHistory();
-        $index = $recommend->getIndexCol();
+        $query = $recommend->getHistory($userID);
+        $index = $recommend->getIndexCol($userID);
         $matchDocs = array();
         $docCount = count($index['docCount']);
 
@@ -236,7 +238,7 @@ class User extends CI_Controller {
             }
         }        
 
-        echo "<br>hasil<br>";
+        //echo "<br>hasil<br>";
         // length normalise
         $matchDocs2 = $recommend->normalise($matchDocs);
         //print_r($matchDocs2);
@@ -247,9 +249,44 @@ class User extends CI_Controller {
         }*/
 
         arsort($matchDocs2); // high to low
-        var_dump($matchDocs2);
+        //var_dump($matchDocs2);
+        
+        $data['recom'] = $matchDocs2;
+        $this->load->view('header');
+        $this->load->view('user/user_view_cb_rekomendasi', $data);
+        $this->load->view('footer');
     }
 
+    public function lihat_histori_nilai() {        
+        // Melihat data rating
+        if (($this->session->userdata('user_name') != null)) {
+            $userID = $this->session->userdata('user_id');
+            $string_query = "SELECT `kode_mk`, `nama_mk`, 
+             CASE 
+                  WHEN rating = '5' 
+                     THEN 'A'
+                  ELSE CASE
+                  WHEN rating = '4' 
+                     THEN 'B'
+                  ELSE CASE
+                  WHEN rating = '3' 
+                     THEN 'C'
+                  ELSE CASE
+                  WHEN rating = '2' 
+                     THEN 'D'
+                  ELSE CASE
+                  WHEN rating = '1' 
+                     THEN 'E'
+             END END END END END as nilai FROM `rs_histori_nilai`,`rs_mk_wajib` WHERE `rs_histori_nilai`.`id_mk` = `rs_mk_wajib`.`id_mk` AND `rs_histori_nilai`.`id_user` =".$userID;
+            $query = $this->db->query($string_query);            
+            $data['results'] = $query;
+            $this->load->view('header');
+            $this->load->view('user/user_view_histori_nilai', $data);
+            $this->load->view('footer');
+        }
+        else
+            redirect("login/index");
+    }
 }
 ?>
 

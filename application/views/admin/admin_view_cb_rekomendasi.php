@@ -6,19 +6,19 @@
  */
 ?>
 <div class="container-fluid">
-    <?php include 'user_db.php'; ?>
+    <?php include 'admin_db.php'; ?>
     <div class="row-fluid">
         <div class="span6">
             <h3>
-                <a class="btn" href="<?php echo base_url() . 'user/welcome/' ?>" ><i id="back" class="icon-backward"></i></a>
-                Daftar Rekomendasi Mata Kuliah Pilihan diambil dari rating.                
+                <a class="btn" href="javascript:javascript:history.go(-1)" ><i id="back" class="icon-backward"></i></a>
+                Daftar Rekomendasi Mata Kuliah Pilihan dari histori nilai
             </h3>
             <div id="dataMK">
                 <table class="table table-hover">
                     <thead>
                         <tr>
                             <th>Nama MK</th>
-                            <th>Prediksi Rating</th>                                                                                
+                            <th>Similarity TF-IDF</th>                                                                                
                         </tr>
                     </thead>
                     <tbody>

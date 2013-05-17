@@ -86,7 +86,8 @@ class ItemBased {
                         }
 
                         $sim = $this->cosineSimilarity($scores, $scores2);
-                        if($sim > 0) { // minimum similarity 
+                        if($sim > 0) { 
+                                // minimal similarity
                                 $similarities[$item][$item2] = $sim;
                                 $similarities[$item2][$item] = $sim;
                         }
@@ -182,11 +183,12 @@ class ItemBased {
                         $items[$item] = $scores[$user];
                 }
         }
-        print_r($items);
+        //print_r($items);
         foreach($items as $item => $score) {
                 foreach($similarities[$item] as $sim_item => $sim) {                    
-                        echo "<br>";
-                        echo $sim_item." ".$sim." ".$item;
+                        /*
+                         * echo "<br>";                        
+                         * echo $sim_item." ".$sim." ".$item;*/
                         if(isset($items[$sim_item])) {
                                 continue; // they already rated this
                         }

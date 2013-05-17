@@ -11,14 +11,14 @@
         <div class="span6">
             <h3>
                 <a class="btn" href="<?php echo base_url() . 'user/welcome/' ?>" ><i id="back" class="icon-backward"></i></a>
-                Daftar Rekomendasi Mata Kuliah Pilihan diambil dari rating.                
+                Daftar Rekomendasi Mata Kuliah Pilihan diambil dari histori mata kuliah.                
             </h3>
             <div id="dataMK">
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Nama MK</th>
-                            <th>Prediksi Rating</th>                                                                                
+                            <th>Nama Matakuliah</th>
+                            <th>Kemiripan (TF-IDF)</th>                                                                                
                         </tr>
                     </thead>
                     <tbody>

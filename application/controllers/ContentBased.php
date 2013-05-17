@@ -15,9 +15,9 @@ define("TERM_POSITION", 1);
 
 class ContentBased {
 
-    function getHistory()
+    function getHistory($userID)
     {
-        $userID = 31;
+        //$userID = 31;
         $query = "SELECT deskripsi FROM `rs_histori_nilai`, `rs_mk_wajib` WHERE `id_user` = ".$userID." AND `rating` > 4 AND `rs_histori_nilai`.`id_mk` = `rs_mk_wajib`.`id_mk`";
         $result = mysql_query($query)or die("<br/><br/>".mysql_error());
         $historyMK = array();
@@ -97,13 +97,65 @@ class ContentBased {
         return array('docCount' => $docCount, 'dictionary' => $dictionary);
     }
 
-    function getIndexCol() {
+    function getuserMkRating($userID)
+    {
+        $string_query = "SELECT `nama_mk`, `rating`, `deskripsi` FROM `rs_review`,`rs_matakuliah` WHERE `rs_review`.`id_mk` = `rs_matakuliah`.`id_mk` AND `rs_review`.`id_user` = " . $userID;
+        $result = mysql_query($string_query)or die("<br/><br/>".mysql_error());
+        $rating = array();
+        while ($row = mysql_fetch_array($result)) {
+            //$mkID = $row{'nama_mk'};
+            //$rating[$mkID] = $row{'deskripsi'};
+            $rating[] = $row{'nama_mk'};
+        }
+        return $rating;
+    }
+    
+    function getIndexAcc() {
         /*$collection = array(
             1 => 'this string is a short string but a good string',
             2 => 'this one isn\'t quite like the rest but is here',
             3 => 'this is a different short string that\' not as short'
         );*/
-        $userID = 31;
+        //$userID = 31;
+        $string_query = "SELECT * FROM `rs_matakuliah`";
+        $result = mysql_query($string_query)or die("<br/><br/>".mysql_error());
+        $collection = array();
+        while ($row = mysql_fetch_array($result)) {
+            $mkID = $row{'nama_mk'};
+            $collection[$mkID] = $row{'deskripsi'};
+        }
+        //print_r($collection);
+
+        $dictionary = array();
+        $docCount = array();
+
+        foreach ($collection as $docID => $doc) {
+            $terms = explode(' ', $doc);
+            $docCount[$docID] = count($terms);
+
+            foreach ($terms as $term) {
+                if (!isset($dictionary[$term])) {
+                    $dictionary[$term] = array('df' => 0, 'postings' => array());
+                }
+                if (!isset($dictionary[$term]['postings'][$docID])) {
+                    $dictionary[$term]['df']++;
+                    $dictionary[$term]['postings'][$docID] = array('tf' => 0);
+                }
+
+                $dictionary[$term]['postings'][$docID]['tf']++;
+            }
+        }
+
+        return array('docCount' => $docCount, 'dictionary' => $dictionary);
+    }
+    
+    function getIndexCol($userID) {
+        /*$collection = array(
+            1 => 'this string is a short string but a good string',
+            2 => 'this one isn\'t quite like the rest but is here',
+            3 => 'this is a different short string that\' not as short'
+        );*/
+        //$userID = 31;
         $string_query = "SELECT * FROM `rs_matakuliah` WHERE `id_mk` NOT IN (SELECT `id_mk` FROM `rs_review` WHERE `rs_review`.`id_user` = " .$userID. " AND `rs_review`.`id_mk` = `rs_matakuliah`.`id_mk`)";
         $result = mysql_query($string_query)or die("<br/><br/>".mysql_error());
         $collection = array();
