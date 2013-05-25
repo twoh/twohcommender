@@ -410,13 +410,79 @@ class Admin extends CI_Controller {
         $this->load->view('footer');
     }
 
+    function get_cf_recommendation_full() {
+        //Mendapatkan rekomendasi
+        require_once 'ItemBased.php';
+        require_once 'ContentBased.php';
+        $user_id = $this->getUsers();
+        $result = mysql_query(
+                "SELECT `id_user`, `rating`,`nama_mk` 
+                FROM `rs_review`,`rs_matakuliah`
+                WHERE `rs_matakuliah`.`id_mk` = `rs_review`.`id_mk` and `rating` > 0 
+                ORDER BY `rs_review`.`id_user` ASC;");
+        $recommend = new ItemBased();
+        $recommendCB = new ContentBased();
+        $ratings = array();
+        $recom = array();
+        $totalUsers = count($user_id);
+        for ($i = 0; $i < $totalUsers; $i++) {
+            while ($row = mysql_fetch_array($result)) {
+                $userID = $row{'id_user'};
+                $ratings[$userID][$row{'nama_mk'}] = $row{'rating'};
+            }
+            //print_r($ratings);
+            //echo "<br>";            
+            $transform = $recommend->transformPreferences($ratings);
+            $similiarity = $recommend->generateSimilarities($transform);
+            $recom[$i] = $recommend->full_recommend($user_id[$i], $transform, $similiarity, 20);
+            $user_rating = $recommendCB->getuserMkRating($user_id[$i]);
+            $relevant = array_intersect($recom[$i], $user_rating);
+            //print_r($recom[$i]);
+            //print_r($user_rating);
+
+            $jumlahS[$user_id[$i]] = count($relevant);
+            $jumlahM[$user_id[$i]] = count($recom[$i]);
+            $jumlahR[$user_id[$i]] = count($user_rating);
+            $precision[$user_id[$i]] = count($relevant) / count($recom[$i]);
+            $recall[$user_id[$i]] = count($relevant) / count($user_rating);
+            //print_r($recom[$i]);
+            //$data['recom'] = $recom;
+        }
+        $data['similar'] = $jumlahS;
+        $data['total'] = $jumlahM;
+        $data['relevan'] = $jumlahR;
+        $data['precision'] = $precision;
+        $data['recall'] = $recall;
+
+        //print_r($precision);
+        //print_r($recall);
+        $this->load->view('header');
+        $this->load->view('admin/admin_view_cf_precision_recall', $data);
+        $this->load->view('footer');
+    }
+
+    function getUsers() {
+        $query = "SELECT `id_user` 
+                  FROM `rs_review` 
+                  WHERE `id_user` > 29
+                  GROUP BY(`id_user`) 
+                  ORDER BY count(`id_mk`) DESC 
+                  LIMIT 0, 20";
+        $result = mysql_query($query);
+        $users = array();
+        while ($row = mysql_fetch_array($result)) {
+            $users[] = $row{'id_user'};
+        }
+        return $users;
+    }
+
     function cb_accuration() {
         //Akurasi dari content based
         error_reporting(E_ALL ^ (E_NOTICE | E_WARNING));
         //Mendapatkan rekomendasi
         require_once 'ContentBased.php';
         //print_r($ratings);
-        $userID = array('84', '36', '57');
+        $userID = $this->getUsers();
         $recommend = new ContentBased();
         //$index = $recommend->getIndexCol();
         $userCount = count($userID);
@@ -426,8 +492,8 @@ class Admin extends CI_Controller {
         $matchDocs2 = array();
         $index = $recommend->getIndexAcc();
         for ($i = 0; $i < $userCount; $i++) {
-            $query = $recommend->getHistory($userID[$i]);                       
-            $queryRating = $recommend->getuserMkRating($userID[$i]);            
+            $query = $recommend->getHistory($userID[$i]);
+            $queryRating = $recommend->getuserMkRating($userID[$i]);
             //$docCount = count($index['docCount']);
             foreach ($query as $qterm) {
                 $entry = $index['dictionary'][$qterm];
@@ -435,30 +501,41 @@ class Admin extends CI_Controller {
                 if (is_array($entry['postings'])) {
                     foreach ($entry['postings'] as $docID => $posting) {
                         //if(!isset($matchDocs[$docID]))
-                        $matchDocs[$i][] =$docID;
+                        $matchDocs[$i][] = $docID;
                     }
                 }
             }
             //echo "<br>hasil<br>";
             // length normalise
-            echo "<br>MULAIIIII <br>";            
+            //echo "<br>MULAIIIII <br>";            
             $matchDocs2[$i] = array_values(array_unique($matchDocs[$i]));
             $similarity = array_intersect($matchDocs2[$i], $queryRating);
-            $total = array_values(array_unique(array_merge($matchDocs2[$i], $queryRating)));
-            $precision[$i]= count($similarity)/count($matchDocs2[$i]);
-            $recall[$i]= count($similarity)/count($total);            
-            echo "<br>QUERY <br>";
-            print_r($query);            
-            echo "<br>QUERY RATING <br>";
-            print_r($queryRating);
-            echo "<br>MATCH DOCS <br>";
-            print_r($matchDocs2[$i]);            
-            echo "<br>Similarity : <br>";
-            print_r($similarity);
+            //$total = array_values(array_unique(array_merge($matchDocs2[$i], $queryRating)));
+            $jumlahS[$userID[$i]] = count($similarity);
+            $jumlahM[$userID[$i]] = count($matchDocs2[$i]);
+            $jumlahR[$userID[$i]] = count($queryRating);
+            $precision[$userID[$i]] = count($similarity) / count($matchDocs2[$i]);
+            $recall[$userID[$i]] = count($similarity) / count($queryRating);
+            /* echo "<br>QUERY <br>";
+              print_r($query);
+              echo "<br>QUERY RATING <br>";
+              print_r($queryRating);
+              echo "<br>MATCH DOCS <br>";
+              print_r($matchDocs2[$i]);
+              echo "<br>Similarity : <br>";
+              print_r($similarity); */
         }
-        
-        print_r($precision);
-        print_r($recall);
+        $data['similar'] = $jumlahS;
+        $data['total'] = $jumlahM;
+        $data['relevan'] = $jumlahR;
+        $data['precision'] = $precision;
+        $data['recall'] = $recall;
+
+        //print_r($precision);
+        //print_r($recall);
+        $this->load->view('header');
+        $this->load->view('admin/admin_view_cb_accuration', $data);
+        $this->load->view('footer');
     }
 
     function get_cb_recommendation() {

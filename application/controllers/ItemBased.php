@@ -208,6 +208,42 @@ class ItemBased {
         arsort($out);
         return array_slice($out, 0, $top); // return top n
     }
+    
+    function full_recommend($user, $data, $similarities, $top) {
+        error_reporting(E_ALL ^ (E_NOTICE | E_WARNING));
+        $out = array();
+        $items = array();
+        $sims = array();
+        /*Mencari item yang telah dirating oleh pengguna
+         * dan memasukkannya ke dalam array items[]
+         */
+        foreach($data as $item => $scores) {
+                if(isset($scores[$user])) {
+                        $items[$item] = $scores[$user];
+                }
+        }
+        //print_r($items);
+        foreach($items as $item => $score) {
+                foreach($similarities[$item] as $sim_item => $sim) {                    
+                        /*
+                         * echo "<br>";                        
+                         * echo $sim_item." ".$sim." ".$item;*/                                                
+                        if(!array_key_exists($sim_item,$out)) {
+           /*error*/                     $out[$sim_item] == 0;
+                        }
+          /*error*/             $out[$sim_item] += $sim * $score;                                                                                          
+          /*error*/             $sims[$sim_item] += $sim;
+                }
+        }
+        $key_out = array();
+        foreach($out as $item => $score) {
+                $key_out[] = $item;
+        }
+
+        arsort($key_out);
+        return array_slice($key_out, 0, $top); // return top n
+    }
+    
 }
 
 

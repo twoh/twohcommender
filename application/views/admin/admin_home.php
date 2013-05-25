@@ -8,4 +8,5 @@ echo 'ini admin home';
 ?>
 
 <p>HAHAHAHAA
+    masih dalam tahap rekonstruksi
 </p>
