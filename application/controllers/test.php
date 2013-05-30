@@ -40,7 +40,7 @@ and open the template in the editor.
 
         
         //this string is a short string but a good string
-        $query = array('this', 'string','is','a','but','good', 'short','string', 'string');
+        $query = array('this','short','string');
         $ir = new ContentBased();
         $index = $ir->getIndexTest();
         $matchDocs = array();
@@ -51,11 +51,12 @@ and open the template in the editor.
             //echo $entry['dictionary'][$qterm];
             foreach ($entry['postings'] as $docID => $posting) {
                 //if(!isset($matchDocs[$docID]))
+                echo $qterm . "<br>";
+                echo " (1) DocID : $docID tf :" . $posting['tf'] . " df " . $entry['df'] . " tfidf: " . $matchDocs[$docID] . "<br>";
                 $matchDocs[$docID] +=
                         $posting['tf'] *
-                        log($docCount + 1 / $entry['df'] + 1, 2);
-                echo $qterm . "<br>";
-                echo "DocID : $docID tf :" . $posting['tf'] . " entry df " . $entry['df'] . " matchDocs : " . $matchDocs[$docID] . "<br>";
+                        log($docCount/ $entry['df'], 2);                
+                echo " (2) DocID : $docID tf :" . $posting['tf'] . " df " . $entry['df'] . " tfidf: " . $matchDocs[$docID] . "<br>";
             }
         }
         
@@ -68,9 +69,9 @@ and open the template in the editor.
         // length normalise
         foreach ($matchDocs as $docID => $score) {
             $matchDocs[$docID] = $score / $index['docCount'][$docID];
-            echo "doccount: $docCount docID: $docID score : $score index : " . $index['docCount'][$docID] . "<br>";
+            echo "<br>doccount: $docCount docID: $docID score : $score index : " . $index['docCount'][$docID] . "";
         }
-
+        echo "<br>";
         arsort($matchDocs); // high to low
 
         var_dump($matchDocs);

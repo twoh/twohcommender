@@ -384,7 +384,7 @@ class Admin extends CI_Controller {
     }
 
     function get_recommendation() {
-        //Mendapatkan rekomendasi
+        //Mendapatkan rekomendasi collaborative filtering
         require_once 'ItemBased.php';
         $user_id = $_GET['id'];
         $result = mysql_query(
@@ -508,7 +508,7 @@ class Admin extends CI_Controller {
             //echo "<br>hasil<br>";
             // length normalise
             //echo "<br>MULAIIIII <br>";            
-            $matchDocs2[$i] = array_values(array_unique($matchDocs[$i]));
+            $matchDocs2[$i] = array_slice(array_values(array_unique($matchDocs[$i])),0,20);
             $similarity = array_intersect($matchDocs2[$i], $queryRating);
             //$total = array_values(array_unique(array_merge($matchDocs2[$i], $queryRating)));
             $jumlahS[$userID[$i]] = count($similarity);
@@ -538,6 +538,68 @@ class Admin extends CI_Controller {
         $this->load->view('footer');
     }
 
+    function cb_accuration_a() {
+        //Akurasi dari content based
+        error_reporting(E_ALL ^ (E_NOTICE | E_WARNING));
+        //Mendapatkan rekomendasi
+        require_once 'ContentBased.php';
+        //print_r($ratings);
+        $userID = $this->getUsers();
+        $recommend = new ContentBased();
+        //$index = $recommend->getIndexCol();
+        $userCount = count($userID);
+        $precision = array();
+        $recall = array();
+        $matchDocs = array();
+        $matchDocs2 = array();
+        $index = $recommend->getIndexAcc();
+        for ($i = 0; $i < $userCount; $i++) {
+            $query = $recommend->getHistoryA($userID[$i]);
+            $queryRating = $recommend->getuserMkRating($userID[$i]);
+            //$docCount = count($index['docCount']);
+            foreach ($query as $qterm) {
+                $entry = $index['dictionary'][$qterm];
+                echo $entry['dictionary'][$qterm];
+                if (is_array($entry['postings'])) {
+                    foreach ($entry['postings'] as $docID => $posting) {
+                        //if(!isset($matchDocs[$docID]))
+                        $matchDocs[$i][] = $docID;
+                    }
+                }
+            }
+            //echo "<br>hasil<br>";
+            // length normalise
+            //echo "<br>MULAIIIII <br>";            
+            $matchDocs2[$i] = array_slice(array_values(array_unique($matchDocs[$i])),0,20);
+            $similarity = array_intersect($matchDocs2[$i], $queryRating);
+            //$total = array_values(array_unique(array_merge($matchDocs2[$i], $queryRating)));
+            $jumlahS[$userID[$i]] = count($similarity);
+            $jumlahM[$userID[$i]] = count($matchDocs2[$i]);
+            $jumlahR[$userID[$i]] = count($queryRating);
+            $precision[$userID[$i]] = count($similarity) / count($matchDocs2[$i]);
+            $recall[$userID[$i]] = count($similarity) / count($queryRating);
+            /* echo "<br>QUERY <br>";
+              print_r($query);
+              echo "<br>QUERY RATING <br>";
+              print_r($queryRating);
+              echo "<br>MATCH DOCS <br>";
+              print_r($matchDocs2[$i]);
+              echo "<br>Similarity : <br>";
+              print_r($similarity); */
+        }
+        $data['similar'] = $jumlahS;
+        $data['total'] = $jumlahM;
+        $data['relevan'] = $jumlahR;
+        $data['precision'] = $precision;
+        $data['recall'] = $recall;
+
+        //print_r($precision);
+        //print_r($recall);
+        $this->load->view('header');
+        $this->load->view('admin/admin_view_cb_accuration', $data);
+        $this->load->view('footer');
+    }
+    
     function get_cb_recommendation() {
         // Melihat rekomendasi pengguna menggunakan konten based method
         error_reporting(E_ALL ^ (E_NOTICE | E_WARNING));
@@ -547,41 +609,48 @@ class Admin extends CI_Controller {
         $userID = $_GET['id'];
         $recommend = new ContentBased();
         //$index = $recommend->getIndexCol();
-        $query = $recommend->getHistory($userID);
-        $index = $recommend->getIndexCol($userID);
-        $matchDocs = array();
-        $docCount = count($index['docCount']);
+        $query = $recommend->getHistory($userID);        
+        if ($query != NULL) {
+            //print_r($query);
+            $index = $recommend->getIndexCol($userID);
+            $matchDocs = array();
+            $docCount = count($index['docCount']);
 
-        foreach ($query as $qterm) {
-            $entry = $index['dictionary'][$qterm];
-            echo $entry['dictionary'][$qterm];
-            if (is_array($entry['postings'])) {
-                foreach ($entry['postings'] as $docID => $posting) {
-                    //if(!isset($matchDocs[$docID]))
-                    $matchDocs[$docID] +=
-                            $posting['tf'] *
-                            log($docCount + 1 / $entry['df'] + 1, 2);
+            foreach ($query as $qterm) {
+                $entry = $index['dictionary'][$qterm];
+                //echo $entry['dictionary'][$qterm];
+                if (is_array($entry['postings'])) {
+                    foreach ($entry['postings'] as $docID => $posting) {
+                        //if(!isset($matchDocs[$docID]))
+                        $matchDocs[$docID] +=
+                                $posting['tf'] *
+                                log($docCount/ $entry['df'], 2);
+                    }
                 }
             }
+
+            //echo "<br>hasil<br>";
+            // length normalise
+            $matchDocs2 = $recommend->normalise($matchDocs);
+            //print_r($matchDocs2);
+            /* print_r($matchDocs);
+              foreach ($matchDocs2 as $docID => $score) {
+              $matchDocs2[$docID] = $score / $index['docCount'][$docID];
+              echo "doccount: $docCount docID: $docID score : $score index : " . $index['docCount'][$docID] . " matchDocs: " . $matchDocs2[$docID] . "<br>";
+              } */
+
+            arsort($matchDocs2); // high to low
+            //var_dump($matchDocs2);
+            $data['recom'] = $matchDocs2;
+            $this->load->view('header');
+            $this->load->view('admin/admin_view_cb_rekomendasi', $data);
+            $this->load->view('footer');
+        } else {
+            $data['recom'] = 0;
+            $this->load->view('header');
+            $this->load->view('admin/admin_view_cb_rekomendasi', $data);
+            $this->load->view('footer');
         }
-
-        echo "<br>hasil<br>";
-        // length normalise
-        $matchDocs2 = $recommend->normalise($matchDocs);
-        //print_r($matchDocs2);
-        /* print_r($matchDocs);
-          foreach ($matchDocs2 as $docID => $score) {
-          $matchDocs2[$docID] = $score / $index['docCount'][$docID];
-          echo "doccount: $docCount docID: $docID score : $score index : " . $index['docCount'][$docID] . " matchDocs: " . $matchDocs2[$docID] . "<br>";
-          } */
-
-        arsort($matchDocs2); // high to low
-        //var_dump($matchDocs2);
-
-        $data['recom'] = $matchDocs2;
-        $this->load->view('header');
-        $this->load->view('admin/admin_view_cb_rekomendasi', $data);
-        $this->load->view('footer');
     }
 
     public function lihat_rating() {
@@ -659,5 +728,4 @@ class Admin extends CI_Controller {
     }
 
 }
-
 ?>

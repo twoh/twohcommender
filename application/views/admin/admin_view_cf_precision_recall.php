@@ -33,10 +33,10 @@
                             ?></td>
                                 <td><?php echo $relevan[$key];
                             ?></td>                                
-                                <td><?php echo $value." = ".(round($value,4)*100)."%";
+                                <td><?php echo $value;//." = ".(round($value,4)*100)."%";
                                 $precTotal += $value;
                             ?></td>
-                                <td><?php echo $recall[$key]." = ".(round($recall[$key],4)*100)."%";
+                                <td><?php echo $recall[$key];//." = ".(round($recall[$key],4)*100)."%";
                                 $reccTotal += $recall[$key];
                             ?></td>
                             </tr>

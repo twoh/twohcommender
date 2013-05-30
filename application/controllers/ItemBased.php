@@ -8,17 +8,17 @@ class ItemBased {
     
     function cosineSimilarity($item1ratings, $item2ratings)
     {
+        
         $n = $sum1 = $similarity = $sumSq1 = $sumSq2 = $product = 0;
         foreach($item1ratings as $user => $score) {
                 if(!isset($item2ratings[$user])) {
                         continue;
-                }
-                
+                }                
                 $n++;
                 $sum1 += $score * $item2ratings[$user];                
                 $sumSq1 += pow($score, 2);
                 $sumSq2 += pow($item2ratings[$user], 2); 
-                
+                //echo "<br>user ".$user." score ".$score." score $item2ratings[$user]";
         }
         $product = sqrt($sumSq1) * sqrt($sumSq2);
         if($sum1>0)
@@ -84,7 +84,7 @@ class ItemBased {
                         if($item2 == $item || isset($similarities[$item][$item2])) {
                                 continue;
                         }
-
+                        //echo "<br> mk1 : $item mk2 : $item2";
                         $sim = $this->cosineSimilarity($scores, $scores2);
                         if($sim > 0) { 
                                 // minimal similarity
@@ -146,9 +146,10 @@ class ItemBased {
                 }
         }
         //print_r($items);
-        foreach($items as $item => $score) {
+        
+        foreach($items as $item => $score) {                    
             foreach($similarities[$item] as $sim_item => $sim) {                    
-               // echo "<br>";
+                //echo "<br>";
                 //echo $sim_item." ".$sim." ".$item;
                 if(isset($items[$sim_item])) {
                         continue; // they already rated this
@@ -160,8 +161,7 @@ class ItemBased {
   /*error*/             $out[$sim_item] += $sim * $score;                                                                                          
   /*error*/             $sims[$sim_item] += $sim;
                 }
-        }
-        
+        }                
         foreach($out as $item => $score) {
                 $out[$item] = $score / $sims[$item];
         }
@@ -184,11 +184,12 @@ class ItemBased {
                 }
         }
         //print_r($items);
+        echo "<table border=\"1px\">";
         foreach($items as $item => $score) {
+            echo "<tr><td></td><td>".$item."</td></tr>";
                 foreach($similarities[$item] as $sim_item => $sim) {                    
-                        /*
-                         * echo "<br>";                        
-                         * echo $sim_item." ".$sim." ".$item;*/
+                        
+                        echo "<tr><td>".$sim_item."</td><td> ".$sim."</td></tr>";
                         if(isset($items[$sim_item])) {
                                 continue; // they already rated this
                         }
@@ -200,6 +201,7 @@ class ItemBased {
           /*error*/             $sims[$sim_item] += $sim;
                 }
         }
+        echo "</table>";
         
         foreach($out as $item => $score) {
                 $out[$item] = $score / $sims[$item];
