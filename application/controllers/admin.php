@@ -92,6 +92,118 @@ class Admin extends CI_Controller {
             $this->login();
     }
 
+    function data_mk_wajib() {
+        //Melihat data mata kuliah
+        if (($this->session->userdata('user_name') == "herdi")) {
+            $this->load->view('admin/admin_mk_wajib');
+        }
+        else
+            $this->login();
+    }
+
+    public function lihat_mk_wajib() {
+        if (($this->session->userdata('user_name') == "herdi")) {
+            //MELIHAT DATA MATA KULIAH <PAGING VERSION>
+            $string_query = "select * from rs_mk_wajib";
+            $query = $this->db->query($string_query);
+            $config = array();
+            $config['total_rows'] = $query->num_rows();
+            $config['per_page'] = '7';
+            $config['uri_segment'] = 3;
+            $config['num_links'] = 2;
+            $config['base_url'] = base_url() . 'admin/lihat_mk_wajib';
+            $config['full_tag_open'] = '<ul>';
+            $config['full_tag_close'] = '</ul>';
+            $config['first_tag_open'] = '<li>';
+            $config['first_tag_close'] = '</li>';
+            $config['num_tag_open'] = '<li>';
+            $config['num_tag_close'] = '</li>';
+            $config['cur_tag_open'] = '<li class="disabled"><a>';
+            $config['cur_tag_close'] = '</a></li>';
+            $config['prev_tag_open'] = '<li>';
+            $config['prev_tag_close'] = '</li>';
+            $config['next_tag_open'] = '<li>';
+            $config['next_tag_close'] = '</li>';
+            $config['last_tag_open'] = '<li>';
+            $config['last_tag_close'] = '</li>';
+            $this->pagination->initialize($config);
+            //$num = $config['per_page'];
+            $offset = $this->uri->segment(3);
+
+            //$offset = ( ! is_numeric($offset) || $offset < 1) ? 0 : $offset; 
+            if (empty($offset)) {
+                $offset = 0;
+            }
+
+            $data['results'] = $this->model_admin->get_mk_wajib_paging($config['per_page'], $offset);
+            $data['links'] = $this->pagination->create_links();
+            $this->load->view('header');
+            $this->load->view('admin/admin_view_mk_wajib', $data);
+            $this->load->view('footer');
+        }
+        else
+            $this->login();
+    }
+
+    function edit_mk_wajib() {
+        //Meload Halaman edit mata kuliah
+        if (($this->session->userdata('user_name') == "herdi")) {
+            $id = $this->input->post('edit_mk');
+            //echo 'IDE SAMA DENGAN'.$id;
+            $this->db->where('id_mk', $id);
+            $query = $this->db->get("rs_mk_wajib");
+            if ($query->num_rows() > 0) {
+                $data['mk'] = $query;
+                $this->load->view('admin/edit/mk_wajib', $data);
+            } else {
+                echo 'dataempty';
+            }
+        }
+        else
+            $this->login();
+    }
+
+    function do_edit_mk_wajib() {
+        //Melakukan update mata kuliah
+        if (($this->session->userdata('user_name') == "herdi")) {
+        $this->load->library('form_validation');
+        $this->form_validation->set_rules('namamk', 'Nama Matakuliah', 'trim|required|min_length[4]|xss_clean|max_length[75]');
+        $this->form_validation->set_rules('sks', 'SKS', 'trim|required|min_length[1]|max_length[1]');
+        $this->form_validation->set_rules('deskripsi', 'Deskripsi MK', 'trim|required|min_length[0]|max_length[1400]');
+        if ($this->form_validation->run() == FALSE) {
+//            echo 'salaaah';
+            redirect('admin/lihat_mk_wajib');
+        } else {
+//                        $id = $this->input->post('idmk');
+//                        $nama = $this->input->post('namamk');
+//                        $sks = $this->input->post('sks');
+//                        $deskripsi = $this->input->post('deskripsi');
+//                        echo $id;
+//                        echo $nama;
+//                        echo $deskripsi;
+//                        echo $sks;
+            $this->model_admin->update_mk_wajib();
+            redirect('admin/lihat_mk_wajib');
+//            echo 'sukses';
+//            echo 'dijalankan';
+        }
+        }
+        else
+            $this->login();
+    }
+
+    function delete_mk_wajib() {
+        //fungsi untuk menghapus mata kuliah
+        if (($this->session->userdata('user_name') == "herdi")) {
+        $id = $this->input->post('edit_mk');
+        $this->db->where('id_mk', $id);
+        $this->db->delete('rs_mk_wajib');
+        $this->load->view('admin/delete/mata_kuliah');
+        }
+        else
+            $this->login();
+    }
+
     public function lihat_mk() {
         if (($this->session->userdata('user_name') == "herdi")) {
             //MELIHAT DATA MATA KULIAH <PAGING VERSION>
@@ -126,7 +238,7 @@ class Admin extends CI_Controller {
                 $offset = 0;
             }
 
-            $data['results'] = $this->model_admin->get_mk_paging($config['per_page'], $offset);
+            $data['results'] = $this->model_admin->get_mk_adm_paging($config['per_page'], $offset);
             $data['links'] = $this->pagination->create_links();
             $this->load->view('header');
             $this->load->view('admin/admin_matakuliah', $data);
@@ -134,6 +246,32 @@ class Admin extends CI_Controller {
         }
         else
             $this->login();
+    }
+
+    function insert_mk_wajib() {
+        //Meload Halaman Insert Mata Kuliah
+        if (($this->session->userdata('user_name') == "herdi"))
+            $this->load->view('admin/insert/mk_wajib');
+        else
+            $this->login();
+    }
+
+    function do_insert_mk_wajib() {
+        //Melakukan insert mata kuliah
+        if (($this->session->userdata('user_name') == "herdi")) {
+        $this->load->library('form_validation');
+        $this->form_validation->set_rules('namamk', 'Nama Matakuliah', 'trim|required|min_length[4]|xss_clean|max_length[75]');
+        $this->form_validation->set_rules('sks', 'SKS', 'trim|required|min_length[1]|max_length[1]');
+        $this->form_validation->set_rules('deskripsi', 'Deskripsi MK', 'trim|required|min_length[0]|max_length[140]');
+        if ($this->form_validation->run() == FALSE) {
+            redirect('admin/lihat_mk');
+        } else {
+            $this->model_admin->insert_mk_wajib();
+            redirect('admin/lihat_mk_wajib');
+        }
+        }
+        else
+            $this->login();        
     }
 
     function insert_mk() {
@@ -164,15 +302,16 @@ class Admin extends CI_Controller {
 
     function do_edit_mk() {
         //Melakukan update mata kuliah
-        $this->load->library('form_validation');
-        $this->form_validation->set_rules('namamk', 'Nama Matakuliah', 'trim|required|min_length[4]|xss_clean|max_length[75]');
-        $this->form_validation->set_rules('sks', 'SKS', 'trim|required|min_length[1]|max_length[1]');
-        $this->form_validation->set_rules('deskripsi', 'Deskripsi MK', 'trim|required|min_length[0]|max_length[1400]');
-        $this->form_validation->set_rules('kk', 'Kelompok Keahlian', 'trim|required|min_length[3]|max_length[4]');
-        if ($this->form_validation->run() == FALSE) {
+        if (($this->session->userdata('user_name') == "herdi")) {
+            $this->load->library('form_validation');
+            $this->form_validation->set_rules('namamk', 'Nama Matakuliah', 'trim|required|min_length[4]|xss_clean|max_length[75]');
+            $this->form_validation->set_rules('sks', 'SKS', 'trim|required|min_length[1]|max_length[1]');
+            $this->form_validation->set_rules('deskripsi', 'Deskripsi MK', 'trim|required|min_length[0]|max_length[1400]');
+            $this->form_validation->set_rules('kk', 'Kelompok Keahlian', 'trim|required|min_length[3]|max_length[4]');
+            if ($this->form_validation->run() == FALSE) {
 //            echo 'salaaah';
-            redirect('admin/lihat_mk');
-        } else {
+                redirect('admin/lihat_mk');
+            } else {
 //                        $id = $this->input->post('idmk');
 //                        $nama = $this->input->post('namamk');
 //                        $sks = $this->input->post('sks');
@@ -181,15 +320,19 @@ class Admin extends CI_Controller {
 //                        echo $nama;
 //                        echo $deskripsi;
 //                        echo $sks;
-            $this->model_admin->update_mk();
-            redirect('admin/lihat_mk');
+                $this->model_admin->update_mk();
+                redirect('admin/lihat_mk');
 //            echo 'sukses';
 //            echo 'dijalankan';
+            }
         }
+        else
+            $this->login();
     }
 
     function do_insert_mk() {
         //Melakukan insert mata kuliah
+        if (($this->session->userdata('user_name') == "herdi")) {
         $this->load->library('form_validation');
         $this->form_validation->set_rules('namamk', 'Nama Matakuliah', 'trim|required|min_length[4]|xss_clean|max_length[75]');
         $this->form_validation->set_rules('sks', 'SKS', 'trim|required|min_length[1]|max_length[1]');
@@ -201,22 +344,33 @@ class Admin extends CI_Controller {
             $this->model_admin->insert_mk();
             redirect('admin/lihat_mk');
         }
+        }
+        else
+            $this->login();
     }
 
     function delete_mk() {
         //fungsi untuk menghapus mata kuliah
+        if (($this->session->userdata('user_name') == "herdi")) {
         $id = $this->input->post('edit_mk');
         $this->db->where('id_mk', $id);
         $this->db->delete('rs_matakuliah');
         $this->load->view('admin/delete/mata_kuliah');
+        }
+        else
+            $this->login();
     }
 
     function delete_user() {
+        if (($this->session->userdata('user_name') == "herdi")) {
         //fungsi untuk menghapus mata kuliah
         $id = $this->input->post('edit_user');
         $this->db->where('id_user', $id);
         $this->db->delete('rs_user');
         $this->load->view('admin/delete/pengguna');
+        }
+        else
+            $this->login();
     }
 
     function insert_user() {
@@ -247,6 +401,7 @@ class Admin extends CI_Controller {
 
     function do_edit_user() {
         //Melakukan update mata kuliah
+        if (($this->session->userdata('user_name') == "herdi")) {
         $this->load->library('form_validation');
         $this->form_validation->set_error_delimiters('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">×</button>', '</div>');
         $this->form_validation->set_rules('username', 'User Name', 'trim|required|min_length[4]|xss_clean');
@@ -260,10 +415,14 @@ class Admin extends CI_Controller {
 //            echo 'sukses';
 //            echo 'dijalankan';
         }
+        }
+        else
+            $this->login();
     }
 
     public function do_insert_user() {
         //Melakukan insert user
+        if (($this->session->userdata('user_name') == "herdi")) {
         $this->load->library('form_validation');
         $this->form_validation->set_error_delimiters('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">×</button>', '</div>');
         $this->form_validation->set_rules('user_name', 'User Name', 'trim|required|min_length[4]|xss_clean');
@@ -275,6 +434,9 @@ class Admin extends CI_Controller {
             $this->model_admin->insert_user();
             redirect('admin/lihat_pengguna');
         }
+        }
+        else
+            $this->login();
     }
 
     public function lihat_pengguna() {
@@ -321,6 +483,7 @@ class Admin extends CI_Controller {
     }
 
     function cf_accuration() {
+        //Akurasi MAE
         require_once 'ItemBased.php';
         // tempat menyimpan hasil rating sistem
         $system_ratings = array();
@@ -381,10 +544,12 @@ class Admin extends CI_Controller {
         //$this->load->view('header');
         //$this->load->view('user/user_view_rekomendasi', $data);
         //$this->load->view('footer');
+        
     }
 
     function get_recommendation() {
         //Mendapatkan rekomendasi collaborative filtering
+        if (($this->session->userdata('user_name') == "herdi")) {
         require_once 'ItemBased.php';
         $user_id = $_GET['id'];
         $result = mysql_query(
@@ -408,10 +573,14 @@ class Admin extends CI_Controller {
         $this->load->view('header');
         $this->load->view('admin/admin_view_rekomendasi', $data);
         $this->load->view('footer');
+        }
+        else
+            $this->login();
     }
 
     function get_cf_recommendation_full() {
-        //Mendapatkan rekomendasi
+        //Mendapatkan akurasi precision recall Content based
+        if (($this->session->userdata('user_name') == "herdi")) {
         require_once 'ItemBased.php';
         require_once 'ContentBased.php';
         $user_id = $this->getUsers();
@@ -459,21 +628,131 @@ class Admin extends CI_Controller {
         $this->load->view('header');
         $this->load->view('admin/admin_view_cf_precision_recall', $data);
         $this->load->view('footer');
+        }
+        else
+            $this->login();
     }
 
     function getUsers() {
-        $query = "SELECT `id_user` 
-                  FROM `rs_review` 
-                  WHERE `id_user` > 29
-                  GROUP BY(`id_user`) 
-                  ORDER BY count(`id_mk`) DESC 
-                  LIMIT 0, 20";
-        $result = mysql_query($query);
-        $users = array();
-        while ($row = mysql_fetch_array($result)) {
-            $users[] = $row{'id_user'};
-        }
+        /* $query = "SELECT `id_user` 
+          FROM `rs_review`
+          WHERE `id_user` > 29
+          GROUP BY(`id_user`)
+          ORDER BY count(`id_mk`) DESC
+          LIMIT 0, 20";
+          $result = mysql_query($query); */
+        $users = array(101, 118, 84, 137, 57, 59, 91, 129, 98, 31, 51, 67, 100, 116, 36, 103, 90, 124, 76, 92);
+        /* while ($row = mysql_fetch_array($result)) {
+          $users[] = $row{'id_user'};
+          } */
         return $users;
+    }
+
+    function getKeywordMKWajib() {
+        if (($this->session->userdata('user_name') == "herdi")) {
+        $string_query = "SELECT `kode_mk`, `deskripsi` FROM `rs_mk_wajib`";
+        $query = $this->db->query($string_query);
+        $data['results'] = $query;
+        $this->load->view('header');
+        $this->load->view('admin/admin_view_keyword', $data);
+        $this->load->view('footer');
+        }
+        else
+            $this->login();
+    }
+
+    function getKeywordMKPilihan() {
+        if (($this->session->userdata('user_name') == "herdi")) {
+        $string_query = "SELECT `kode_mk`, `deskripsi` FROM `rs_matakuliah`";
+        $query = $this->db->query($string_query);
+        $data['results'] = $query;
+        $this->load->view('header');
+        $this->load->view('admin/admin_view_keyword', $data);
+        $this->load->view('footer');
+        }
+        else
+            $this->login();
+    }
+
+    public function showAllHistoriNilai() {
+        // Melihat data histori nilai dari mahasiswa bersangkutan
+        if (($this->session->userdata('user_name') == "herdi")) {
+        $userID = $this->getUsers();
+        $userCount = count($userID);
+        for ($i = 0; $i < $userCount; $i++) {
+            $user_ID = $userID[$i];
+            $string_query = "SELECT `kode_mk`, `nama_mk`, 
+             CASE 
+                  WHEN rating = '5' 
+                     THEN 'A'
+                  ELSE CASE
+                  WHEN rating = '4' 
+                     THEN 'B'
+                  ELSE CASE
+                  WHEN rating = '3' 
+                     THEN 'C'
+                  ELSE CASE
+                  WHEN rating = '2' 
+                     THEN 'D'
+                  ELSE CASE
+                  WHEN rating = '1' 
+                     THEN 'E'
+             END END END END END as nilai FROM `rs_histori_nilai`,`rs_mk_wajib` WHERE `rs_histori_nilai`.`id_mk` = `rs_mk_wajib`.`id_mk` AND `rs_histori_nilai`.`id_user` =" . $user_ID;
+            $query = $this->db->query($string_query);
+            $data['results'][$userID[$i]] = $query;
+        }
+        $this->load->view('header');
+        $this->load->view('admin/admin_view_all_histori_nilai', $data);
+        $this->load->view('footer');
+        }
+        else
+            $this->login();
+    }
+
+    function showDataRating() {
+        if (($this->session->userdata('user_name') == "herdi")) {
+        $userID = $this->getUsers();
+        $userCount = count($userID);
+        for ($i = 0; $i < $userCount; $i++) {
+            $user_ID = $userID[$i];
+            $string_query = "SELECT `nama_mk`, `rating`, `review` FROM `rs_review`,`rs_matakuliah` WHERE `rs_review`.`id_mk` = `rs_matakuliah`.`id_mk` AND `rs_review`.`id_user` = " . $user_ID;
+            $query = $this->db->query($string_query);
+            $config = array();
+            $config['total_rows'] = $query->num_rows();
+            $config['per_page'] = '50';
+            $config['uri_segment'] = 3;
+            $config['num_links'] = 2;
+            $config['base_url'] = base_url() . 'admin/lihat_rating';
+            $config['full_tag_open'] = '<ul>';
+            $config['full_tag_close'] = '</ul>';
+            $config['first_tag_open'] = '<li>';
+            $config['first_tag_close'] = '</li>';
+            $config['num_tag_open'] = '<li>';
+            $config['num_tag_close'] = '</li>';
+            $config['cur_tag_open'] = '<li class="disabled"><a>';
+            $config['cur_tag_close'] = '</a></li>';
+            $config['prev_tag_open'] = '<li>';
+            $config['prev_tag_close'] = '</li>';
+            $config['next_tag_open'] = '<li>';
+            $config['next_tag_close'] = '</li>';
+            $config['last_tag_open'] = '<li>';
+            $config['last_tag_close'] = '</li>';
+            $this->pagination->initialize($config);
+            //$num = $config['per_page'];
+            $offset = $this->uri->segment(3);
+            //$offset = ( ! is_numeric($offset) || $offset < 1) ? 0 : $offset; 
+            if (empty($offset)) {
+                $offset = 0;
+            }
+            $data['results'][$userID[$i]] = $this->model_user->get_rating_paging($config['per_page'], $offset, $user_ID);
+            $data['links'] = $this->pagination->create_links();
+        }
+        $this->load->view('header');
+        $this->load->view('admin/admin_view_all_rating', $data);
+        $this->load->view('footer');
+        }
+        else
+            $this->login();
     }
 
     function cb_accuration() {
@@ -508,7 +787,7 @@ class Admin extends CI_Controller {
             //echo "<br>hasil<br>";
             // length normalise
             //echo "<br>MULAIIIII <br>";            
-            $matchDocs2[$i] = array_slice(array_values(array_unique($matchDocs[$i])),0,20);
+            $matchDocs2[$i] = array_slice(array_values(array_unique($matchDocs[$i])), 0, 20);
             $similarity = array_intersect($matchDocs2[$i], $queryRating);
             //$total = array_values(array_unique(array_merge($matchDocs2[$i], $queryRating)));
             $jumlahS[$userID[$i]] = count($similarity);
@@ -570,7 +849,7 @@ class Admin extends CI_Controller {
             //echo "<br>hasil<br>";
             // length normalise
             //echo "<br>MULAIIIII <br>";            
-            $matchDocs2[$i] = array_slice(array_values(array_unique($matchDocs[$i])),0,20);
+            $matchDocs2[$i] = array_slice(array_values(array_unique($matchDocs[$i])), 0, 20);
             $similarity = array_intersect($matchDocs2[$i], $queryRating);
             //$total = array_values(array_unique(array_merge($matchDocs2[$i], $queryRating)));
             $jumlahS[$userID[$i]] = count($similarity);
@@ -599,7 +878,7 @@ class Admin extends CI_Controller {
         $this->load->view('admin/admin_view_cb_accuration', $data);
         $this->load->view('footer');
     }
-    
+
     function get_cb_recommendation() {
         // Melihat rekomendasi pengguna menggunakan konten based method
         error_reporting(E_ALL ^ (E_NOTICE | E_WARNING));
@@ -609,7 +888,7 @@ class Admin extends CI_Controller {
         $userID = $_GET['id'];
         $recommend = new ContentBased();
         //$index = $recommend->getIndexCol();
-        $query = $recommend->getHistory($userID);        
+        $query = $recommend->getHistory($userID);
         if ($query != NULL) {
             //print_r($query);
             $index = $recommend->getIndexCol($userID);
@@ -624,7 +903,7 @@ class Admin extends CI_Controller {
                         //if(!isset($matchDocs[$docID]))
                         $matchDocs[$docID] +=
                                 $posting['tf'] *
-                                log($docCount/ $entry['df'], 2);
+                                log($docCount / $entry['df'], 2);
                     }
                 }
             }
@@ -728,4 +1007,5 @@ class Admin extends CI_Controller {
     }
 
 }
+
 ?>

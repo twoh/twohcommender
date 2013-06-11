@@ -60,12 +60,29 @@ class Model_admin extends CI_Model{
         echo $this->input->post('deskripsi');
         echo $this->input->post('kk');*/
         $data=array(
+            'kode_mk'=>$this->input->post('kodemk'),
             'nama_mk'=>$this->input->post('namamk'),
             'sks'=>$this->input->post('sks'),
             'deskripsi'=>$this->input->post('deskripsi'),
             'kelompok_keahlian'=>$this->input->post('kk')
         );
         $this->db->insert('rs_matakuliah',$data);
+    }
+    
+    public function insert_mk_wajib()
+    {
+        /*echo $this->input->post('namamk');
+        echo $this->input->post('sks');
+        echo $this->input->post('deskripsi');
+        echo $this->input->post('kk');*/
+        $data=array(
+            'kode_mk'=>$this->input->post('kodemk'),
+            'nama_mk'=>$this->input->post('namamk'),
+            'sks'=>$this->input->post('sks'),
+            'deskripsi'=>$this->input->post('deskripsi'),
+            'kelompok_keahlian'=>$this->input->post('kk')
+        );
+        $this->db->insert('rs_mk_wajib',$data);
     }
     
     function get_all_mk()
@@ -80,6 +97,24 @@ class Model_admin extends CI_Model{
         $this->db->limit($limit, $start);
         $this->db->where('`id_mk` NOT IN (SELECT `id_mk` FROM `rs_review` WHERE `rs_review`.`id_user` = '.$this->session->userdata('user_id').' AND `rs_review`.`id_mk` = `rs_matakuliah`.`id_mk`)', NULL, FALSE);
         $query = $this->db->get('rs_matakuliah');
+        return $query;
+    }
+    
+    function get_mk_adm_paging($limit, $start)
+    {
+        //function untuk mengambil paging mata kuliah
+        $this->db->limit($limit, $start);
+        //$this->db->where('`id_mk` NOT IN (SELECT `id_mk` FROM `rs_review` WHERE `rs_review`.`id_user` = '.$this->session->userdata('user_id').' AND `rs_review`.`id_mk` = `rs_matakuliah`.`id_mk`)', NULL, FALSE);
+        $query = $this->db->get('rs_matakuliah');
+        return $query;
+    }
+    
+    function get_mk_wajib_paging($limit, $start)
+    {
+        //function untuk mengambil paging mata kuliah
+        $this->db->limit($limit, $start);
+       //$this->db->where('`id_mk` NOT IN (SELECT `id_mk` FROM `rs_review` WHERE `rs_review`.`id_user` = '.$this->session->userdata('user_id').' AND `rs_review`.`id_mk` = `rs_matakuliah`.`id_mk`)', NULL, FALSE);
+        $query = $this->db->get('rs_mk_wajib');
         return $query;
     }
     
@@ -107,6 +142,27 @@ class Model_admin extends CI_Model{
             );
             $this->db->where('id_mk', $id);
             $this->db->update('rs_matakuliah', $data); 
+        }else
+        {
+            echo 'nggak ada data';
+        }
+    }
+    
+    function update_mk_wajib()
+    {
+        $id = $this->input->post('idmk');
+        //echo 'id = '.$id;
+        if($id!=NULL)
+        {
+            $data = array(
+            'nama_mk'=>$this->input->post('namamk'),
+            'sks'=>$this->input->post('sks'),
+            'deskripsi'=>$this->input->post('deskripsi'),            
+            'kode_mk'=>$this->input->post('kodemk'),
+            'kelompok_keahlian'=>$this->input->post('kk')
+            );
+            $this->db->where('id_mk', $id);
+            $this->db->update('rs_mk_wajib', $data); 
         }else
         {
             echo 'nggak ada data';

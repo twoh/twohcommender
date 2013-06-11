@@ -3,7 +3,7 @@
     <div class="row-fluid">
         
             <h3>
-                <a class="btn" href="<?php echo base_url() . 'admin/lihat_pengguna.twh' ?>" ><i id="back" class="icon-backward"></i></a>
+                <a class="btn" href="<?php echo base_url() . 'admin/index.twh' ?>" ><i id="back" class="icon-backward"></i></a>
                 Precision Recall Collaborative Filtering                
             </h3>            
             <div class="span8">

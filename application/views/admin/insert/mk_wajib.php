@@ -9,12 +9,12 @@
     <div class="">      
         <?php 
         $attributes = array('class' => 'alert alert-info');
-        echo form_open("admin/do_insert_mk",$attributes); ?>
+        echo form_open("admin/do_insert_mk_wajib",$attributes); ?>
         <?php echo validation_errors(''); ?>
-        <h3>Insert Mata Kuliah</h3>
+        <h3>Insert Mata Kuliah Wajib</h3>
         <input type="text" class="input-block-level" name="namamk" placeholder="Nama MK"/>
         <input type="text" class="input-block-level" name="kodemk" placeholder="Kode MK"/>
-        <input type="text" class="input-block-level" name="sks" placeholder="SKS"/>
+        <input type="text" class="input-block-level" name="sks" placeholder="SKS"/>        
         <textarea row="3" class="input-block-level" name="deskripsi" placeholder="Deskripsi"></textarea>
         <input type="text" class="input-block-level" name="kk" placeholder="Kelompok Keahlian"/>
         <button class="btn btn-large btn-primary" type="submit">Tambah</button>

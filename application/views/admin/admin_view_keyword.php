@@ -6,41 +6,31 @@
  */
 ?>
 <div class="container-fluid">
-    <?php include 'user_db.php'; ?>
+    <?php include 'admin_db.php'; ?>
     <div class="row-fluid">
         <div class="span6">
             <h3>
-                <a class="btn" href="welcome" ><i id="back" class="icon-backward"></i></a>
-                Histori Nilai User <?php $this->session->userdata('user_id') ?>
-                <a class="btn" href="<?php echo base_url() . 'user/edit_histori_nilai.twh' ?>">Edit</a>
-            </h3>                    
+                <a class="btn" href="javascript:javascript:history.go(-1)" ><i id="back" class="icon-backward"></i></a>
+                Daftar Rating MK Pilihan yang telah dirating user
+            </h3>
             <div id="dataMK">
                 <table class="table table-hover">
                     <thead>
                         <tr>
                             <th>Kode MK</th>
-                            <th>Nama MK</th>
-                            <th>Nilai</th>                                                        
+                            <th>Deskripi</th>                            
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($results->result() as $mks):
-                            if($mks->nilai!=null)
-                            {
                             ?>
-                        
                             <tr>                                
                                 <td><?php echo $mks->kode_mk;
                             ?></td>
-                                <td><?php echo $mks->nama_mk;
-                            ?></td>
-                                <td>
-                                    <?php echo $mks->nilai;
-                                    ?>      
-                                </td>                                                                
+                                <td><?php echo $mks->deskripsi;
+                            ?></td>                                
                             </tr>
-                        <?php }
-                        endforeach; ?>
+                        <?php endforeach; ?>
                     </tbody>
                 </table>                
             </div>

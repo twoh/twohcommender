@@ -3,7 +3,7 @@
     <div class="row-fluid">
 
         <h3>
-            <a class="btn" href="<?php echo base_url() . 'admin/lihat_pengguna.twh' ?>" ><i id="back" class="icon-backward"></i></a>
+            <a class="btn" href="<?php echo base_url() . 'admin/index.twh' ?>" ><i id="back" class="icon-backward"></i></a>
             Akurasi Sistem Collaborative Filtering                               
         </h3>
         <span class="label label-info">Mean Absolute Error : <?php echo $accuration; ?></span>
