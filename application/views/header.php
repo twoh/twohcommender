@@ -50,7 +50,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-          <a class="brand" href="#">Herdi Course</a>
+          <a class="brand" href="<?php echo base_url() ?>">Herdi Course</a>
           <div class="nav-collapse collapse">
             <ul class="nav">
               <li><a href="<?php echo base_url() ?>">Home</a></li>

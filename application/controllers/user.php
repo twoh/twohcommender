@@ -300,7 +300,13 @@ class User extends CI_Controller {
         $similiarity = $recommend->generateSimilarities($transform);
         $recom = $recommend->recommend($this->session->userdata('user_id'), $transform, $similiarity, 10);
         //print_r($recom);
-        $data['recom'] = $recom;
+        if(!empty($recom))
+        {
+            $data['recom'] = $recom;
+        }else
+        {
+            $data['recom'] = 0;
+        }
         $this->load->view('header');
         $this->load->view('user/user_view_rekomendasi', $data);
         $this->load->view('footer');
@@ -319,10 +325,9 @@ class User extends CI_Controller {
         $index = $recommend->getIndexCol($userID);
         $matchDocs = array();
         $docCount = count($index['docCount']);
-
         foreach ($query as $qterm) {
             $entry = $index['dictionary'][$qterm];
-            echo $entry['dictionary'][$qterm];
+            //echo $entry['dictionary'][$qterm];
             if (is_array($entry['postings'])) {
                 foreach ($entry['postings'] as $docID => $posting) {
                     //if(!isset($matchDocs[$docID]))

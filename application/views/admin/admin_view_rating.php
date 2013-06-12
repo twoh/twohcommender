@@ -11,7 +11,7 @@
         <div class="span6">
             <h3>
                 <a class="btn" href="javascript:javascript:history.go(-1)" ><i id="back" class="icon-backward"></i></a>
-                Daftar Rating MK Pilihan yang telah dirating user <?php echo $_GET['id']; ?>
+                Daftar Rating MK Pilihan <span class="badge badge-info">User : <?php echo $_GET['id'];?></span>
             </h3>
             <div id="dataMK">
                 <table class="table table-hover">

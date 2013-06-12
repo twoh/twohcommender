@@ -217,7 +217,7 @@ class ContentBased {
                 $dictionary[$term]['postings'][$docID]['tf']++;
             }
         }
-        print_r($dictionary);
+        //print_r($dictionary);
         return array('docCount' => $docCount, 'dictionary' => $dictionary);
     }
 

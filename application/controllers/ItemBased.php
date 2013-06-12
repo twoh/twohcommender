@@ -184,12 +184,12 @@ class ItemBased {
                 }
         }
         //print_r($items);
-        echo "<table border=\"1px\">";
+        //echo "<table border=\"1px\">";
         foreach($items as $item => $score) {
-            echo "<tr><td></td><td>".$item."</td></tr>";
+            //echo "<tr><td></td><td>".$item."</td></tr>";
                 foreach($similarities[$item] as $sim_item => $sim) {                    
                         
-                        echo "<tr><td>".$sim_item."</td><td> ".$sim."</td></tr>";
+                        //echo "<tr><td>".$sim_item."</td><td> ".$sim."</td></tr>";
                         if(isset($items[$sim_item])) {
                                 continue; // they already rated this
                         }
@@ -201,7 +201,7 @@ class ItemBased {
           /*error*/             $sims[$sim_item] += $sim;
                 }
         }
-        echo "</table>";
+        //echo "</table>";
         
         foreach($out as $item => $score) {
                 $out[$item] = $score / $sims[$item];

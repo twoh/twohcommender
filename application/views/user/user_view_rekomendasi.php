@@ -1,5 +1,4 @@
 <?php
-
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -22,23 +21,30 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <?php 
-                        
-                        foreach ($recom as $key => $value):
-                            ?>
-                            <tr>                                
-                                <td><?php echo $key;
-                            ?></td>
-                                <td><?php echo $value;
-                            ?></td>                                                                                 
-                            </tr>
-                        <?php endforeach; ?>
+                        <?php
+                        if ($recom != 0) {
+                            foreach ($recom as $key => $value):
+                                ?>
+                                <tr>                                
+                                    <td><?php echo $key; ?>
+                                    </td>
+                                    <td><?php echo $value; ?>
+                                    </td>                                                                                 
+                                </tr>
+                                <?php
+                            endforeach;
+                        }else{
+                            echo "<tr>
+                                <td>Belum ada rekomendasi.
+                                </td>
+                                </tr>";
+                        }
+                        ?>
                     </tbody>
                 </table>                
             </div>
         </div>
         <div class="span4" id="insertMK" toggle="no">
-
         </div>
     </div> <!--row-->
     <script>                                

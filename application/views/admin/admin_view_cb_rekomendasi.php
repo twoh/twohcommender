@@ -8,17 +8,17 @@
 <div class="container-fluid">
     <?php include 'admin_db.php'; ?>
     <div class="row-fluid">
-        <div class="span6">
+        <div class="span7">
             <h3>
                 <a class="btn" href="javascript:javascript:history.go(-1)" ><i id="back" class="icon-backward"></i></a>
-                Daftar Rekomendasi Mata Kuliah Pilihan dari histori nilai
-            </h3>
+                Rekomendasi MK Pilihan dari histori nilai <span class="badge badge-info">User : <?php echo $_GET['id'];?></span>
+            </h3>             
             <div id="dataMK">
                 <table class="table table-hover">
                     <thead>
                         <tr>
                             <th>Nama MK</th>
-                            <th>Similarity TF-IDF</th>                                                                                
+                            <th>Bobot TF-IDF</th>                                                                                
                         </tr>
                     </thead>
                     <tbody>
