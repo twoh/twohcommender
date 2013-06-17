@@ -166,14 +166,14 @@ class Admin extends CI_Controller {
     function do_edit_mk_wajib() {
         //Melakukan update mata kuliah
         if (($this->session->userdata('user_name') == "herdi")) {
-        $this->load->library('form_validation');
-        $this->form_validation->set_rules('namamk', 'Nama Matakuliah', 'trim|required|min_length[4]|xss_clean|max_length[75]');
-        $this->form_validation->set_rules('sks', 'SKS', 'trim|required|min_length[1]|max_length[1]');
-        $this->form_validation->set_rules('deskripsi', 'Deskripsi MK', 'trim|required|min_length[0]|max_length[1400]');
-        if ($this->form_validation->run() == FALSE) {
+            $this->load->library('form_validation');
+            $this->form_validation->set_rules('namamk', 'Nama Matakuliah', 'trim|required|min_length[4]|xss_clean|max_length[75]');
+            $this->form_validation->set_rules('sks', 'SKS', 'trim|required|min_length[1]|max_length[1]');
+            $this->form_validation->set_rules('deskripsi', 'Deskripsi MK', 'trim|required|min_length[0]|max_length[1400]');
+            if ($this->form_validation->run() == FALSE) {
 //            echo 'salaaah';
-            redirect('admin/lihat_mk_wajib');
-        } else {
+                redirect('admin/lihat_mk_wajib');
+            } else {
 //                        $id = $this->input->post('idmk');
 //                        $nama = $this->input->post('namamk');
 //                        $sks = $this->input->post('sks');
@@ -182,11 +182,11 @@ class Admin extends CI_Controller {
 //                        echo $nama;
 //                        echo $deskripsi;
 //                        echo $sks;
-            $this->model_admin->update_mk_wajib();
-            redirect('admin/lihat_mk_wajib');
+                $this->model_admin->update_mk_wajib();
+                redirect('admin/lihat_mk_wajib');
 //            echo 'sukses';
 //            echo 'dijalankan';
-        }
+            }
         }
         else
             $this->login();
@@ -195,10 +195,10 @@ class Admin extends CI_Controller {
     function delete_mk_wajib() {
         //fungsi untuk menghapus mata kuliah
         if (($this->session->userdata('user_name') == "herdi")) {
-        $id = $this->input->post('edit_mk');
-        $this->db->where('id_mk', $id);
-        $this->db->delete('rs_mk_wajib');
-        $this->load->view('admin/delete/mata_kuliah');
+            $id = $this->input->post('edit_mk');
+            $this->db->where('id_mk', $id);
+            $this->db->delete('rs_mk_wajib');
+            $this->load->view('admin/delete/mata_kuliah');
         }
         else
             $this->login();
@@ -259,19 +259,19 @@ class Admin extends CI_Controller {
     function do_insert_mk_wajib() {
         //Melakukan insert mata kuliah
         if (($this->session->userdata('user_name') == "herdi")) {
-        $this->load->library('form_validation');
-        $this->form_validation->set_rules('namamk', 'Nama Matakuliah', 'trim|required|min_length[4]|xss_clean|max_length[75]');
-        $this->form_validation->set_rules('sks', 'SKS', 'trim|required|min_length[1]|max_length[1]');
-        $this->form_validation->set_rules('deskripsi', 'Deskripsi MK', 'trim|required|min_length[0]|max_length[140]');
-        if ($this->form_validation->run() == FALSE) {
-            redirect('admin/lihat_mk');
-        } else {
-            $this->model_admin->insert_mk_wajib();
-            redirect('admin/lihat_mk_wajib');
-        }
+            $this->load->library('form_validation');
+            $this->form_validation->set_rules('namamk', 'Nama Matakuliah', 'trim|required|min_length[4]|xss_clean|max_length[75]');
+            $this->form_validation->set_rules('sks', 'SKS', 'trim|required|min_length[1]|max_length[1]');
+            $this->form_validation->set_rules('deskripsi', 'Deskripsi MK', 'trim|required|min_length[0]|max_length[140]');
+            if ($this->form_validation->run() == FALSE) {
+                redirect('admin/lihat_mk');
+            } else {
+                $this->model_admin->insert_mk_wajib();
+                redirect('admin/lihat_mk_wajib');
+            }
         }
         else
-            $this->login();        
+            $this->login();
     }
 
     function insert_mk() {
@@ -333,17 +333,17 @@ class Admin extends CI_Controller {
     function do_insert_mk() {
         //Melakukan insert mata kuliah
         if (($this->session->userdata('user_name') == "herdi")) {
-        $this->load->library('form_validation');
-        $this->form_validation->set_rules('namamk', 'Nama Matakuliah', 'trim|required|min_length[4]|xss_clean|max_length[75]');
-        $this->form_validation->set_rules('sks', 'SKS', 'trim|required|min_length[1]|max_length[1]');
-        $this->form_validation->set_rules('deskripsi', 'Deskripsi MK', 'trim|required|min_length[0]|max_length[140]');
-        $this->form_validation->set_rules('kk', 'Kelompok Keahlian', 'trim|required|min_length[3]|max_length[4]');
-        if ($this->form_validation->run() == FALSE) {
-            redirect('admin/lihat_mk');
-        } else {
-            $this->model_admin->insert_mk();
-            redirect('admin/lihat_mk');
-        }
+            $this->load->library('form_validation');
+            $this->form_validation->set_rules('namamk', 'Nama Matakuliah', 'trim|required|min_length[4]|xss_clean|max_length[75]');
+            $this->form_validation->set_rules('sks', 'SKS', 'trim|required|min_length[1]|max_length[1]');
+            $this->form_validation->set_rules('deskripsi', 'Deskripsi MK', 'trim|required|min_length[0]|max_length[140]');
+            $this->form_validation->set_rules('kk', 'Kelompok Keahlian', 'trim|required|min_length[3]|max_length[4]');
+            if ($this->form_validation->run() == FALSE) {
+                redirect('admin/lihat_mk');
+            } else {
+                $this->model_admin->insert_mk();
+                redirect('admin/lihat_mk');
+            }
         }
         else
             $this->login();
@@ -352,10 +352,10 @@ class Admin extends CI_Controller {
     function delete_mk() {
         //fungsi untuk menghapus mata kuliah
         if (($this->session->userdata('user_name') == "herdi")) {
-        $id = $this->input->post('edit_mk');
-        $this->db->where('id_mk', $id);
-        $this->db->delete('rs_matakuliah');
-        $this->load->view('admin/delete/mata_kuliah');
+            $id = $this->input->post('edit_mk');
+            $this->db->where('id_mk', $id);
+            $this->db->delete('rs_matakuliah');
+            $this->load->view('admin/delete/mata_kuliah');
         }
         else
             $this->login();
@@ -363,11 +363,11 @@ class Admin extends CI_Controller {
 
     function delete_user() {
         if (($this->session->userdata('user_name') == "herdi")) {
-        //fungsi untuk menghapus mata kuliah
-        $id = $this->input->post('edit_user');
-        $this->db->where('id_user', $id);
-        $this->db->delete('rs_user');
-        $this->load->view('admin/delete/pengguna');
+            //fungsi untuk menghapus mata kuliah
+            $id = $this->input->post('edit_user');
+            $this->db->where('id_user', $id);
+            $this->db->delete('rs_user');
+            $this->load->view('admin/delete/pengguna');
         }
         else
             $this->login();
@@ -402,19 +402,19 @@ class Admin extends CI_Controller {
     function do_edit_user() {
         //Melakukan update mata kuliah
         if (($this->session->userdata('user_name') == "herdi")) {
-        $this->load->library('form_validation');
-        $this->form_validation->set_error_delimiters('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">×</button>', '</div>');
-        $this->form_validation->set_rules('username', 'User Name', 'trim|required|min_length[4]|xss_clean');
-        $this->form_validation->set_rules('email', 'Your Email', 'trim|required|valid_email');
-        if ($this->form_validation->run() == FALSE) {
+            $this->load->library('form_validation');
+            $this->form_validation->set_error_delimiters('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">×</button>', '</div>');
+            $this->form_validation->set_rules('username', 'User Name', 'trim|required|min_length[4]|xss_clean');
+            $this->form_validation->set_rules('email', 'Your Email', 'trim|required|valid_email');
+            if ($this->form_validation->run() == FALSE) {
 //            echo 'salaaah';
-            redirect('admin/lihat_pengguna');
-        } else {
-            $this->model_admin->update_user();
-            redirect('admin/lihat_pengguna');
+                redirect('admin/lihat_pengguna');
+            } else {
+                $this->model_admin->update_user();
+                redirect('admin/lihat_pengguna');
 //            echo 'sukses';
 //            echo 'dijalankan';
-        }
+            }
         }
         else
             $this->login();
@@ -423,17 +423,17 @@ class Admin extends CI_Controller {
     public function do_insert_user() {
         //Melakukan insert user
         if (($this->session->userdata('user_name') == "herdi")) {
-        $this->load->library('form_validation');
-        $this->form_validation->set_error_delimiters('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">×</button>', '</div>');
-        $this->form_validation->set_rules('user_name', 'User Name', 'trim|required|min_length[4]|xss_clean');
-        $this->form_validation->set_rules('email_address', 'Your Email', 'trim|required|valid_email');
-        $this->form_validation->set_rules('password', 'Password', 'trim|required|min_length[4]|max_length[32]');
-        if ($this->form_validation->run() == FALSE) {
-            redirect('admin/lihat_pengguna');
-        } else {
-            $this->model_admin->insert_user();
-            redirect('admin/lihat_pengguna');
-        }
+            $this->load->library('form_validation');
+            $this->form_validation->set_error_delimiters('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">×</button>', '</div>');
+            $this->form_validation->set_rules('user_name', 'User Name', 'trim|required|min_length[4]|xss_clean');
+            $this->form_validation->set_rules('email_address', 'Your Email', 'trim|required|valid_email');
+            $this->form_validation->set_rules('password', 'Password', 'trim|required|min_length[4]|max_length[32]');
+            if ($this->form_validation->run() == FALSE) {
+                redirect('admin/lihat_pengguna');
+            } else {
+                $this->model_admin->insert_user();
+                redirect('admin/lihat_pengguna');
+            }
         }
         else
             $this->login();
@@ -544,35 +544,34 @@ class Admin extends CI_Controller {
         //$this->load->view('header');
         //$this->load->view('user/user_view_rekomendasi', $data);
         //$this->load->view('footer');
-        
     }
-
+    
     function get_recommendation() {
         //Mendapatkan rekomendasi collaborative filtering
         if (($this->session->userdata('user_name') == "herdi")) {
-        require_once 'ItemBased.php';
-        $user_id = $_GET['id'];
-        $result = mysql_query(
-                "SELECT `id_user`, `rating`,`nama_mk` 
+            require_once 'ItemBased.php';
+            $user_id = $_GET['id'];
+            $result = mysql_query(
+                    "SELECT `id_user`, `rating`,`nama_mk` 
                 FROM `rs_review`,`rs_matakuliah`
                 WHERE `rs_matakuliah`.`id_mk` = `rs_review`.`id_mk` and `rating` > 0 
                 ORDER BY `rs_review`.`id_user` ASC;");
-        $ratings = array();
-        while ($row = mysql_fetch_array($result)) {
-            $userID = $row{'id_user'};
-            $ratings[$userID][$row{'nama_mk'}] = $row{'rating'};
-        }
-        //print_r($ratings);
-        //echo "<br>";
-        $recommend = new ItemBased();
-        $transform = $recommend->transformPreferences($ratings);
-        $similiarity = $recommend->generateSimilarities($transform);
-        $recom = $recommend->recommend($user_id, $transform, $similiarity, 10);
-        //print_r($recom);
-        $data['recom'] = $recom;
-        $this->load->view('header');
-        $this->load->view('admin/admin_view_rekomendasi', $data);
-        $this->load->view('footer');
+            $ratings = array();
+            while ($row = mysql_fetch_array($result)) {
+                $userID = $row{'id_user'};
+                $ratings[$userID][$row{'nama_mk'}] = $row{'rating'};
+            }
+            //print_r($ratings);
+            //echo "<br>";
+            $recommend = new ItemBased();
+            $transform = $recommend->transformPreferences($ratings);
+            $similiarity = $recommend->generateSimilarities($transform);
+            $recom = $recommend->recommend($user_id, $transform, $similiarity, 10);
+            //print_r($recom);
+            $data['recom'] = $recom;
+            $this->load->view('header');
+            $this->load->view('admin/admin_view_rekomendasi', $data);
+            $this->load->view('footer');
         }
         else
             $this->login();
@@ -581,53 +580,53 @@ class Admin extends CI_Controller {
     function get_cf_recommendation_full() {
         //Mendapatkan akurasi precision recall Content based
         if (($this->session->userdata('user_name') == "herdi")) {
-        require_once 'ItemBased.php';
-        require_once 'ContentBased.php';
-        $user_id = $this->getUsers();
-        $result = mysql_query(
-                "SELECT `id_user`, `rating`,`nama_mk` 
+            require_once 'ItemBased.php';
+            require_once 'ContentBased.php';
+            $user_id = $this->getUsers();
+            $result = mysql_query(
+                    "SELECT `id_user`, `rating`,`nama_mk` 
                 FROM `rs_review`,`rs_matakuliah`
                 WHERE `rs_matakuliah`.`id_mk` = `rs_review`.`id_mk` and `rating` > 0 
                 ORDER BY `rs_review`.`id_user` ASC;");
-        $recommend = new ItemBased();
-        $recommendCB = new ContentBased();
-        $ratings = array();
-        $recom = array();
-        $totalUsers = count($user_id);
-        for ($i = 0; $i < $totalUsers; $i++) {
-            while ($row = mysql_fetch_array($result)) {
-                $userID = $row{'id_user'};
-                $ratings[$userID][$row{'nama_mk'}] = $row{'rating'};
+            $recommend = new ItemBased();
+            $recommendCB = new ContentBased();
+            $ratings = array();
+            $recom = array();
+            $totalUsers = count($user_id);
+            for ($i = 0; $i < $totalUsers; $i++) {
+                while ($row = mysql_fetch_array($result)) {
+                    $userID = $row{'id_user'};
+                    $ratings[$userID][$row{'nama_mk'}] = $row{'rating'};
+                }
+                //print_r($ratings);
+                //echo "<br>";            
+                $transform = $recommend->transformPreferences($ratings);
+                $similiarity = $recommend->generateSimilarities($transform);
+                $recom[$i] = $recommend->full_recommend($user_id[$i], $transform, $similiarity, 20);
+                $user_rating = $recommendCB->getuserMkRating($user_id[$i]);
+                $relevant = array_intersect($recom[$i], $user_rating);
+                //print_r($recom[$i]);
+                //print_r($user_rating);
+
+                $jumlahS[$user_id[$i]] = count($relevant);
+                $jumlahM[$user_id[$i]] = count($recom[$i]);
+                $jumlahR[$user_id[$i]] = count($user_rating);
+                $precision[$user_id[$i]] = count($relevant) / count($recom[$i]);
+                $recall[$user_id[$i]] = count($relevant) / count($user_rating);
+                //print_r($recom[$i]);
+                //$data['recom'] = $recom;
             }
-            //print_r($ratings);
-            //echo "<br>";            
-            $transform = $recommend->transformPreferences($ratings);
-            $similiarity = $recommend->generateSimilarities($transform);
-            $recom[$i] = $recommend->full_recommend($user_id[$i], $transform, $similiarity, 20);
-            $user_rating = $recommendCB->getuserMkRating($user_id[$i]);
-            $relevant = array_intersect($recom[$i], $user_rating);
-            //print_r($recom[$i]);
-            //print_r($user_rating);
+            $data['similar'] = $jumlahS;
+            $data['total'] = $jumlahM;
+            $data['relevan'] = $jumlahR;
+            $data['precision'] = $precision;
+            $data['recall'] = $recall;
 
-            $jumlahS[$user_id[$i]] = count($relevant);
-            $jumlahM[$user_id[$i]] = count($recom[$i]);
-            $jumlahR[$user_id[$i]] = count($user_rating);
-            $precision[$user_id[$i]] = count($relevant) / count($recom[$i]);
-            $recall[$user_id[$i]] = count($relevant) / count($user_rating);
-            //print_r($recom[$i]);
-            //$data['recom'] = $recom;
-        }
-        $data['similar'] = $jumlahS;
-        $data['total'] = $jumlahM;
-        $data['relevan'] = $jumlahR;
-        $data['precision'] = $precision;
-        $data['recall'] = $recall;
-
-        //print_r($precision);
-        //print_r($recall);
-        $this->load->view('header');
-        $this->load->view('admin/admin_view_cf_precision_recall', $data);
-        $this->load->view('footer');
+            //print_r($precision);
+            //print_r($recall);
+            $this->load->view('header');
+            $this->load->view('admin/admin_view_cf_precision_recall', $data);
+            $this->load->view('footer');
         }
         else
             $this->login();
@@ -650,25 +649,25 @@ class Admin extends CI_Controller {
 
     function getKeywordMKWajib() {
         if (($this->session->userdata('user_name') == "herdi")) {
-        $string_query = "SELECT `kode_mk`, `deskripsi` FROM `rs_mk_wajib`";
-        $query = $this->db->query($string_query);
-        $data['results'] = $query;
-        $this->load->view('header');
-        $this->load->view('admin/admin_view_keyword', $data);
-        $this->load->view('footer');
+            $string_query = "SELECT `kode_mk`, `deskripsi` FROM `rs_mk_wajib`";
+            $query = $this->db->query($string_query);
+            $data['results'] = $query;
+            $this->load->view('header');
+            $this->load->view('admin/admin_view_keyword', $data);
+            $this->load->view('footer');
         }
         else
             $this->login();
-    }
+    }    
 
     function getKeywordMKPilihan() {
         if (($this->session->userdata('user_name') == "herdi")) {
-        $string_query = "SELECT `kode_mk`, `deskripsi` FROM `rs_matakuliah`";
-        $query = $this->db->query($string_query);
-        $data['results'] = $query;
-        $this->load->view('header');
-        $this->load->view('admin/admin_view_keyword', $data);
-        $this->load->view('footer');
+            $string_query = "SELECT `kode_mk`, `deskripsi` FROM `rs_matakuliah`";
+            $query = $this->db->query($string_query);
+            $data['results'] = $query;
+            $this->load->view('header');
+            $this->load->view('admin/admin_view_keyword', $data);
+            $this->load->view('footer');
         }
         else
             $this->login();
@@ -677,11 +676,11 @@ class Admin extends CI_Controller {
     public function showAllHistoriNilai() {
         // Melihat data histori nilai dari mahasiswa bersangkutan
         if (($this->session->userdata('user_name') == "herdi")) {
-        $userID = $this->getUsers();
-        $userCount = count($userID);
-        for ($i = 0; $i < $userCount; $i++) {
-            $user_ID = $userID[$i];
-            $string_query = "SELECT `kode_mk`, `nama_mk`, 
+            $userID = $this->getUsers();
+            $userCount = count($userID);
+            for ($i = 0; $i < $userCount; $i++) {
+                $user_ID = $userID[$i];
+                $string_query = "SELECT `kode_mk`, `nama_mk`, 
              CASE 
                   WHEN rating = '5' 
                      THEN 'A'
@@ -698,12 +697,12 @@ class Admin extends CI_Controller {
                   WHEN rating = '1' 
                      THEN 'E'
              END END END END END as nilai FROM `rs_histori_nilai`,`rs_mk_wajib` WHERE `rs_histori_nilai`.`id_mk` = `rs_mk_wajib`.`id_mk` AND `rs_histori_nilai`.`id_user` =" . $user_ID;
-            $query = $this->db->query($string_query);
-            $data['results'][$userID[$i]] = $query;
-        }
-        $this->load->view('header');
-        $this->load->view('admin/admin_view_all_histori_nilai', $data);
-        $this->load->view('footer');
+                $query = $this->db->query($string_query);
+                $data['results'][$userID[$i]] = $query;
+            }
+            $this->load->view('header');
+            $this->load->view('admin/admin_view_all_histori_nilai', $data);
+            $this->load->view('footer');
         }
         else
             $this->login();
@@ -711,45 +710,45 @@ class Admin extends CI_Controller {
 
     function showDataRating() {
         if (($this->session->userdata('user_name') == "herdi")) {
-        $userID = $this->getUsers();
-        $userCount = count($userID);
-        for ($i = 0; $i < $userCount; $i++) {
-            $user_ID = $userID[$i];
-            $string_query = "SELECT `nama_mk`, `rating`, `review` FROM `rs_review`,`rs_matakuliah` WHERE `rs_review`.`id_mk` = `rs_matakuliah`.`id_mk` AND `rs_review`.`id_user` = " . $user_ID;
-            $query = $this->db->query($string_query);
-            $config = array();
-            $config['total_rows'] = $query->num_rows();
-            $config['per_page'] = '50';
-            $config['uri_segment'] = 3;
-            $config['num_links'] = 2;
-            $config['base_url'] = base_url() . 'admin/lihat_rating';
-            $config['full_tag_open'] = '<ul>';
-            $config['full_tag_close'] = '</ul>';
-            $config['first_tag_open'] = '<li>';
-            $config['first_tag_close'] = '</li>';
-            $config['num_tag_open'] = '<li>';
-            $config['num_tag_close'] = '</li>';
-            $config['cur_tag_open'] = '<li class="disabled"><a>';
-            $config['cur_tag_close'] = '</a></li>';
-            $config['prev_tag_open'] = '<li>';
-            $config['prev_tag_close'] = '</li>';
-            $config['next_tag_open'] = '<li>';
-            $config['next_tag_close'] = '</li>';
-            $config['last_tag_open'] = '<li>';
-            $config['last_tag_close'] = '</li>';
-            $this->pagination->initialize($config);
-            //$num = $config['per_page'];
-            $offset = $this->uri->segment(3);
-            //$offset = ( ! is_numeric($offset) || $offset < 1) ? 0 : $offset; 
-            if (empty($offset)) {
-                $offset = 0;
+            $userID = $this->getUsers();
+            $userCount = count($userID);
+            for ($i = 0; $i < $userCount; $i++) {
+                $user_ID = $userID[$i];
+                $string_query = "SELECT `nama_mk`, `rating`, `review` FROM `rs_review`,`rs_matakuliah` WHERE `rs_review`.`id_mk` = `rs_matakuliah`.`id_mk` AND `rs_review`.`id_user` = " . $user_ID;
+                $query = $this->db->query($string_query);
+                $config = array();
+                $config['total_rows'] = $query->num_rows();
+                $config['per_page'] = '50';
+                $config['uri_segment'] = 3;
+                $config['num_links'] = 2;
+                $config['base_url'] = base_url() . 'admin/lihat_rating';
+                $config['full_tag_open'] = '<ul>';
+                $config['full_tag_close'] = '</ul>';
+                $config['first_tag_open'] = '<li>';
+                $config['first_tag_close'] = '</li>';
+                $config['num_tag_open'] = '<li>';
+                $config['num_tag_close'] = '</li>';
+                $config['cur_tag_open'] = '<li class="disabled"><a>';
+                $config['cur_tag_close'] = '</a></li>';
+                $config['prev_tag_open'] = '<li>';
+                $config['prev_tag_close'] = '</li>';
+                $config['next_tag_open'] = '<li>';
+                $config['next_tag_close'] = '</li>';
+                $config['last_tag_open'] = '<li>';
+                $config['last_tag_close'] = '</li>';
+                $this->pagination->initialize($config);
+                //$num = $config['per_page'];
+                $offset = $this->uri->segment(3);
+                //$offset = ( ! is_numeric($offset) || $offset < 1) ? 0 : $offset; 
+                if (empty($offset)) {
+                    $offset = 0;
+                }
+                $data['results'][$userID[$i]] = $this->model_user->get_rating_paging($config['per_page'], $offset, $user_ID);
+                $data['links'] = $this->pagination->create_links();
             }
-            $data['results'][$userID[$i]] = $this->model_user->get_rating_paging($config['per_page'], $offset, $user_ID);
-            $data['links'] = $this->pagination->create_links();
-        }
-        $this->load->view('header');
-        $this->load->view('admin/admin_view_all_rating', $data);
-        $this->load->view('footer');
+            $this->load->view('header');
+            $this->load->view('admin/admin_view_all_rating', $data);
+            $this->load->view('footer');
         }
         else
             $this->login();
@@ -809,7 +808,7 @@ class Admin extends CI_Controller {
         $data['relevan'] = $jumlahR;
         $data['precision'] = $precision;
         $data['recall'] = $recall;
-
+        $data['jenis'] = "kedua";
         //print_r($precision);
         //print_r($recall);
         $this->load->view('header');
@@ -871,7 +870,7 @@ class Admin extends CI_Controller {
         $data['relevan'] = $jumlahR;
         $data['precision'] = $precision;
         $data['recall'] = $recall;
-
+        $data['jenis'] = "pertama";
         //print_r($precision);
         //print_r($recall);
         $this->load->view('header');
@@ -879,6 +878,49 @@ class Admin extends CI_Controller {
         $this->load->view('footer');
     }
 
+    function constrain_nilai($id_user) {
+        $query = "SELECT count(rs_histori_nilai.id_mk) jumlah, tingkat FROM `rs_histori_nilai`,rs_mk_wajib WHERE rs_histori_nilai.id_user = " . $id_user . " AND rs_histori_nilai.id_mk = rs_mk_wajib.id_mk GROUP BY tingkat";
+        $result = mysql_query($query);
+        $histori = array();
+        while ($row = mysql_fetch_array($result)) {
+            $histori[$row{'tingkat'}] = $row{'jumlah'};
+        }
+        if (($histori[0] > 0) AND ($histori[1] >= 10) AND ($histori[2] >= 10)) {
+            $lulus = TRUE;
+        }
+        else
+            $lulus = FALSE;
+        print_r($histori);
+        return $lulus;
+    }
+
+    function save_terms() {
+        //Menyimpan terms ke dalam database
+        error_reporting(E_ALL ^ (E_NOTICE | E_WARNING));
+        //Mendapatkan rekomendasi
+        require_once 'ContentBased.php';
+        $recommend = new ContentBased();
+        $index = $recommend->getIndexAcc();
+        $docCount = count($index['docCount']);
+        foreach ($index['dictionary'] as $term => $df)
+        {
+            foreach($df as $keys => $values)
+            {
+                foreach($values as $nama_mk => $tf)
+                {
+                    //print_r($keys);
+                    $tfidf=($tf['tf'] *log($docCount / $df['df'], 2));
+                    //echo $term." dan ".$df['df']." dan ".$values." dan ".$nama_mk." dan ".$tf['tf']." dan $tfidf <br/>";
+                    $query = "INSERT INTO `rs_term`(`term`, `nama_mk`, `tf`, `idf`, `tfidf`) VALUES ('".$term."','".$nama_mk."','".$tf['tf']."','".$df['df']."','".$tfidf."')";
+                    mysql_query($query);
+                    //$tfidf=0;
+                }                
+            }
+            
+        }
+    }
+    
+    
     function get_cb_recommendation() {
         // Melihat rekomendasi pengguna menggunakan konten based method
         error_reporting(E_ALL ^ (E_NOTICE | E_WARNING));
@@ -886,15 +928,17 @@ class Admin extends CI_Controller {
         require_once 'ContentBased.php';
         //print_r($ratings);
         $userID = $_GET['id'];
+
         $recommend = new ContentBased();
         //$index = $recommend->getIndexCol();
         $query = $recommend->getHistory($userID);
-        if ($query != NULL) {
+        if ($query != NULL AND $this->constrain_nilai($userID) == TRUE) {
             //print_r($query);
             $index = $recommend->getIndexCol($userID);
             $matchDocs = array();
             $docCount = count($index['docCount']);
-
+            //echo " <br/><br/><br/><br/><br/>";
+            //print_r($index);
             foreach ($query as $qterm) {
                 $entry = $index['dictionary'][$qterm];
                 //echo $entry['dictionary'][$qterm];

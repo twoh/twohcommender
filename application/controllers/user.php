@@ -52,7 +52,8 @@ class User extends CI_Controller {
     public function data_rating() {
         //fungsi untuk melihat data rating pengguna
         if (($this->session->userdata('user_name') != null)) {
-            $this->load->view('user/user_data_rating');
+            $data['rating'] = $this->cek_rating();
+            $this->load->view('user/user_data_rating', $data);
         }
         else
             redirect("login/index");
@@ -201,11 +202,11 @@ class User extends CI_Controller {
         else
             $this->login();
     }
-    
+
     function do_edit_rating() {
         //Melakukan update mata kuliah
         $userID = $this->session->userdata('user_id');
-        $this->load->library('form_validation');                
+        $this->load->library('form_validation');
         $this->form_validation->set_rules('review', 'Review MK', 'trim|required|min_length[0]|max_length[280]');
         $this->form_validation->set_rules('rating', 'Rating', 'trim|required|min_length[0]|max_length[1]');
         if ($this->form_validation->run() == FALSE) {
@@ -226,20 +227,20 @@ class User extends CI_Controller {
 //            echo 'dijalankan';
         }
     }
-    
+
     function delete_rating() {
         //fungsi untuk menghapus mata kuliah
         if (($this->session->userdata('user_name') != null)) {
-        $userID = $this->session->userdata('user_id');
-        $id = $this->input->post('edit_mk');
-        $this->db->where('id_mk', $id);
-        $this->db->where('id_user', $userID);
-        $this->db->delete('rs_review');
-        $this->load->view('user/delete/rating');        
+            $userID = $this->session->userdata('user_id');
+            $id = $this->input->post('edit_mk');
+            $this->db->where('id_mk', $id);
+            $this->db->where('id_user', $userID);
+            $this->db->delete('rs_review');
+            $this->load->view('user/delete/rating');
         }else
             redirect("login/index");
     }
-    
+
     public function addRating() {
         // menambah data Rating
         if (($this->session->userdata('user_name') != null)) {
@@ -300,16 +301,30 @@ class User extends CI_Controller {
         $similiarity = $recommend->generateSimilarities($transform);
         $recom = $recommend->recommend($this->session->userdata('user_id'), $transform, $similiarity, 10);
         //print_r($recom);
-        if(!empty($recom))
-        {
+        if (!empty($recom)) {
             $data['recom'] = $recom;
-        }else
-        {
+        } else {
             $data['recom'] = 0;
         }
         $this->load->view('header');
         $this->load->view('user/user_view_rekomendasi', $data);
         $this->load->view('footer');
+    }
+    
+    function constrain_nilai($id_user) {
+        $query = "SELECT count(rs_histori_nilai.id_mk) jumlah, tingkat FROM `rs_histori_nilai`,rs_mk_wajib WHERE rs_histori_nilai.id_user = " . $id_user . " AND rs_histori_nilai.id_mk = rs_mk_wajib.id_mk GROUP BY tingkat";
+        $result = mysql_query($query);
+        $histori = array();
+        while ($row = mysql_fetch_array($result)) {
+            $histori[$row{'tingkat'}] = $row{'jumlah'};
+        }
+        if (($histori[0] <= 1) AND ($histori[1] >= 10) AND ($histori[2] >= 10)) {
+            $lulus = TRUE;
+        }
+        else
+            $lulus = FALSE;
+        print_r($histori);
+        return $lulus;
     }
 
     function get_cb_recommendation() {
@@ -319,42 +334,46 @@ class User extends CI_Controller {
         require_once 'ContentBased.php';
         //print_r($ratings);
         $userID = $this->session->userdata('user_id');
-        $recommend = new ContentBased();
-        //$index = $recommend->getIndexCol();
-        $query = $recommend->getHistory($userID);
-        $index = $recommend->getIndexCol($userID);
-        $matchDocs = array();
-        $docCount = count($index['docCount']);
-        foreach ($query as $qterm) {
-            $entry = $index['dictionary'][$qterm];
-            //echo $entry['dictionary'][$qterm];
-            if (is_array($entry['postings'])) {
-                foreach ($entry['postings'] as $docID => $posting) {
-                    //if(!isset($matchDocs[$docID]))
-                    $matchDocs[$docID] +=
-                            $posting['tf'] *
-                            log($docCount + 1 / $entry['df'] + 1, 2);
+        if ($this->constrain_nilai($userID) == TRUE) {
+            $recommend = new ContentBased();
+            //$index = $recommend->getIndexCol();
+            $query = $recommend->getHistory($userID);
+            $index = $recommend->getIndexCol($userID);
+            $matchDocs = array();
+            $docCount = count($index['docCount']);
+            foreach ($query as $qterm) {
+                $entry = $index['dictionary'][$qterm];
+                //echo $entry['dictionary'][$qterm];
+                if (is_array($entry['postings'])) {
+                    foreach ($entry['postings'] as $docID => $posting) {
+                        //if(!isset($matchDocs[$docID]))
+                        $matchDocs[$docID] +=
+                                $posting['tf'] *
+                                log($docCount + 1 / $entry['df'] + 1, 2);
+                    }
                 }
             }
+            //echo "<br>hasil<br>";
+            // length normalise
+            $matchDocs2 = array_slice($recommend->normalise($matchDocs), 0, 10);
+            //print_r($matchDocs2);
+            /* print_r($matchDocs);
+              foreach ($matchDocs2 as $docID => $score) {
+              $matchDocs2[$docID] = $score / $index['docCount'][$docID];
+              echo "doccount: $docCount docID: $docID score : $score index : " . $index['docCount'][$docID] . " matchDocs: " . $matchDocs2[$docID] . "<br>";
+              } */
+            arsort($matchDocs2); // high to low
+            //var_dump($matchDocs2);
+            $data['recom'] = $matchDocs2;
+            $this->load->view('header');
+            $this->load->view('user/user_view_cb_rekomendasi', $data);
+            $this->load->view('footer');
+        } else {
+            $data['lulus'] = "histori nilai kurang";
+            $this->load->view('header');
+            $this->load->view('user/user_view_cb_rekomendasi', $data);
+            $this->load->view('footer');
         }
-
-        //echo "<br>hasil<br>";
-        // length normalise
-        $matchDocs2 = $recommend->normalise($matchDocs);
-        //print_r($matchDocs2);
-        /* print_r($matchDocs);
-          foreach ($matchDocs2 as $docID => $score) {
-          $matchDocs2[$docID] = $score / $index['docCount'][$docID];
-          echo "doccount: $docCount docID: $docID score : $score index : " . $index['docCount'][$docID] . " matchDocs: " . $matchDocs2[$docID] . "<br>";
-          } */
-
-        arsort($matchDocs2); // high to low
-        //var_dump($matchDocs2);
-
-        $data['recom'] = $matchDocs2;
-        $this->load->view('header');
-        $this->load->view('user/user_view_cb_rekomendasi', $data);
-        $this->load->view('footer');
     }
 
     public function edit_histori_nilai() {
@@ -380,7 +399,7 @@ class User extends CI_Controller {
         $result = $this->db->query($string_query);
         $mk = array();
         foreach ($result->result_array() as $row) {
-             $mk[$row['id_mk']]=$row['id_mk'];            
+            $mk[$row['id_mk']] = $row['id_mk'];
         }
         $idMK = $this->input->post('idMK');
         $nilai = $this->input->post('nilai');

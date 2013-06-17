@@ -16,6 +16,7 @@ define("TERM_POSITION", 1);
 class ContentBased {
 
     function getHistory($userID) {
+        //Mengamnbil histori mahasiswa A & B
         //$userID = 31;
         $query = "SELECT deskripsi FROM `rs_histori_nilai`, `rs_mk_wajib` WHERE `id_user` = " . $userID . " AND `rating` >= 4 AND `rs_histori_nilai`.`id_mk` = `rs_mk_wajib`.`id_mk`";
         $result = mysql_query($query) or die("<br/><br/>" . mysql_error());
@@ -35,7 +36,7 @@ class ContentBased {
     }
 
     function getHistoryA($userID) {
-        //$userID = 31;
+        // Mengambil histori mahasiswa
         $query = "SELECT deskripsi FROM `rs_histori_nilai`, `rs_mk_wajib` WHERE `id_user` = " . $userID . " AND `rating` > 4 AND `rs_histori_nilai`.`id_mk` = `rs_mk_wajib`.`id_mk`";
         $result = mysql_query($query) or die("<br/><br/>" . mysql_error());
         $historyMK = array();
@@ -115,7 +116,7 @@ class ContentBased {
                 $dictionary[$term]['postings'][$docID]['tf']++;
             }
         }
-
+        print_r($dictionary);
         return array('docCount' => $docCount, 'dictionary' => $dictionary);
     }
 
@@ -138,6 +139,7 @@ class ContentBased {
           3 => 'this is a different short string that\' not as short'
           ); */
         //$userID = 31;
+        //Ambil semua index MK pilihan
         $string_query = "SELECT * FROM `rs_matakuliah`";
         $result = mysql_query($string_query) or die("<br/><br/>" . mysql_error());
         $collection = array();

@@ -29,12 +29,12 @@
                     </p>                
                     <h5>Pengujian Pertama</h5>
 
-                    <a class="btn btn-large btn-inverse" href="<?php echo base_url() . 'admin/cb_accuration_a.twh' ?>" onclick="">Cek Akurasi CB</a>
+                    <a class="btn btn-large btn-primary" href="<?php echo base_url() . 'admin/cb_accuration_a.twh' ?>" onclick="">Cek Akurasi CB</a>
                     <br/>
                     <br/>
                     <h5>Pengujian kedua</h5>
 
-                    <a class="btn btn-large btn-inverse" href="<?php echo base_url() . 'admin/cb_accuration.twh' ?>" onclick="">Cek Akurasi CB</a>
+                    <a class="btn btn-large btn-primary" href="<?php echo base_url() . 'admin/cb_accuration.twh' ?>" onclick="">Cek Akurasi CB</a>
                 </div>
 
                 <div class="well">
@@ -42,7 +42,7 @@
                     <p>    
                         Cek akurasi precision recall pada Collaborative Filtering
                     </p>
-                    <a class="btn btn-large btn-success" href="<?php echo base_url() . 'admin/get_cf_recommendation_full.twh' ?>" onclick="">Cek Akurasi CF</a>
+                    <a class="btn btn-large btn-primary" href="<?php echo base_url() . 'admin/get_cf_recommendation_full.twh' ?>" onclick="">Cek Akurasi CF</a>
                 </div>
             </div>
         </div>

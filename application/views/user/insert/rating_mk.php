@@ -27,7 +27,7 @@ $(function(){
 });
 </script>
 -->
-<div class="alert alert-info">            
+<div class="well">            
     <div id="tab-Testing">
         <?php foreach ($mk->result() as $mks): ?>
             <?php

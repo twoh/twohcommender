@@ -43,7 +43,7 @@
             </li>
         </ul>            
         <div class="span12">
-            <div class="well" style="background: #020031; color: white;">
+            <div class="well">
                 <div style="margin: 0 auto 10px; text-align: center;">
                 <h2>Gabung Sekarang</h2>
                 <p>

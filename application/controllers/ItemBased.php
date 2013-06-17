@@ -185,13 +185,16 @@ class ItemBased {
         }
         //print_r($items);
         //echo "<table border=\"1px\">";
+        /*
+         * mencari similarities antara item yang sudah dirating         
+         */
         foreach($items as $item => $score) {
-            //echo "<tr><td></td><td>".$item."</td></tr>";
+            echo "<tr><td></td><td>".$item."</td></tr>";
                 foreach($similarities[$item] as $sim_item => $sim) {                    
                         
                         //echo "<tr><td>".$sim_item."</td><td> ".$sim."</td></tr>";
                         if(isset($items[$sim_item])) {
-                                continue; // they already rated this
+                                continue; // jika sudah dirating
                         }
                         
                         if(!array_key_exists($sim_item,$out)) {

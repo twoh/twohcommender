@@ -15,7 +15,7 @@
         }else{
             ?>
         <p>
-            Belum ada histori rating.
+            Belum ada histori nilai.
         </p>
         <a class="btn" href="<?php echo base_url() . 'user/tambah_histori_nilai.twh' ?>">Tambah Histori Nilai</a>
         <?php
