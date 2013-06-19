@@ -284,10 +284,15 @@ class User extends CI_Controller {
     function get_recommendation() {
         //Mendapatkan rekomendasi
         require_once 'ItemBased.php';
-        $result = mysql_query(
+        /*$result = mysql_query(
                 "SELECT `id_user`, `rating`,`nama_mk` 
                             FROM `rs_review`,`rs_matakuliah`
                             WHERE `rs_matakuliah`.`id_mk` = `rs_review`.`id_mk` and `rating` > 0 
+                            ORDER BY `rs_review`.`id_user` ASC;");*/
+        $result = mysql_query(
+                "SELECT `rs_review`.`id_user`, `rating`,`nama_mk` 
+                            FROM `rs_review`,`rs_matakuliah`, `rs_user`
+                            WHERE `rs_matakuliah`.`id_mk` = `rs_review`.`id_mk` and `rating` > 0 and `rs_user`.`tepat_waktu` != 0 and rs_user.id_user = rs_review.id_user
                             ORDER BY `rs_review`.`id_user` ASC;");
         $ratings = array();
         while ($row = mysql_fetch_array($result)) {
@@ -299,7 +304,8 @@ class User extends CI_Controller {
         $recommend = new ItemBased();
         $transform = $recommend->transformPreferences($ratings);
         $similiarity = $recommend->generateSimilarities($transform);
-        $recom = $recommend->recommend($this->session->userdata('user_id'), $transform, $similiarity, 10);
+        //$recom = $recommend->recommend($this->session->userdata('user_id'), $transform, $similiarity, 10);
+        $recom = $recommend->filter_recommend($this->session->userdata('user_id'), $transform, $similiarity, 10);
         //print_r($recom);
         if (!empty($recom)) {
             $data['recom'] = $recom;
@@ -307,7 +313,45 @@ class User extends CI_Controller {
             $data['recom'] = 0;
         }
         $this->load->view('header');
-        $this->load->view('user/user_view_rekomendasi', $data);
+        //$this->load->view('user/user_view_rekomendasi', $data);
+        $this->load->view('user/user_fil_view_rekomendasi', $data);
+        $this->load->view('footer');
+    }
+    
+    function get_full_recommendation() {
+        //Mendapatkan rekomendasi
+        require_once 'ItemBased.php';
+        /*$result = mysql_query(
+                "SELECT `id_user`, `rating`,`nama_mk` 
+                            FROM `rs_review`,`rs_matakuliah`
+                            WHERE `rs_matakuliah`.`id_mk` = `rs_review`.`id_mk` and `rating` > 0 
+                            ORDER BY `rs_review`.`id_user` ASC;");*/
+        $result = mysql_query(
+                "SELECT `rs_review`.`id_user`, `rating`,`nama_mk` 
+                            FROM `rs_review`,`rs_matakuliah`, `rs_user`
+                            WHERE `rs_matakuliah`.`id_mk` = `rs_review`.`id_mk` and `rating` > 0 and `rs_user`.`tepat_waktu` != 0 and rs_user.id_user = rs_review.id_user
+                            ORDER BY `rs_review`.`id_user` ASC;");
+        $ratings = array();
+        while ($row = mysql_fetch_array($result)) {
+            $userID = $row{'id_user'};
+            $ratings[$userID][$row{'nama_mk'}] = $row{'rating'};
+        }
+        //print_r($ratings);
+        //echo "<br>";
+        $recommend = new ItemBased();
+        $transform = $recommend->transformPreferences($ratings);
+        $similiarity = $recommend->generateSimilarities($transform);
+        //$recom = $recommend->recommend($this->session->userdata('user_id'), $transform, $similiarity, 10);
+        $recom = $recommend->user_full_filter_recommend($this->session->userdata('user_id'), $transform, $similiarity, 10);
+        //print_r($recom);
+        if (!empty($recom)) {
+            $data['recom'] = $recom;
+        } else {
+            $data['recom'] = 0;
+        }
+        $this->load->view('header');
+        //$this->load->view('user/user_view_rekomendasi', $data);
+        $this->load->view('user/user_fil_view_rekomendasi', $data);
         $this->load->view('footer');
     }
     

@@ -632,6 +632,72 @@ class Admin extends CI_Controller {
             $this->login();
     }
 
+    function cf_accuration_filter() {
+        //Mendapatkan akurasi precision recall Content based        
+            require_once 'ItemBased.php';
+            require_once 'ContentBased.php';
+            $user_id = $this->getUsersLulus();
+            $result = mysql_query(
+                "SELECT `rs_review`.`id_user`, `rating`,`nama_mk` 
+                            FROM `rs_review`,`rs_matakuliah`, `rs_user`
+                            WHERE `rs_matakuliah`.`id_mk` = `rs_review`.`id_mk` and `rating` > 0 and `rs_user`.`tepat_waktu` != 0 and rs_user.id_user = rs_review.id_user
+                            ORDER BY `rs_review`.`id_user` ASC;");
+            $recommend = new ItemBased();
+            $recommendCB = new ContentBased();
+            $ratings = array();
+            $recom = array();
+            $totalUsers = count($user_id);
+            for ($i = 0; $i < $totalUsers; $i++) {
+                while ($row = mysql_fetch_array($result)) {
+                    $userID = $row{'id_user'};
+                    $ratings[$userID][$row{'nama_mk'}] = $row{'rating'};
+                }
+                //print_r($ratings);
+                //echo "<br>";            
+                $transform = $recommend->transformPreferences($ratings);
+                $similiarity = $recommend->generateSimilarities($transform);
+                $recom[$i] = $recommend->full_filter_recommend($user_id[$i], $transform, $similiarity, 12);
+                $user_rating = $recommendCB->getuserMkRating($user_id[$i]);
+                $relevant = array_intersect($recom[$i], $user_rating);
+                //print_r($recom[$i]);
+                //print_r($user_rating);
+
+                $jumlahS[$user_id[$i]] = count($relevant);
+                $jumlahM[$user_id[$i]] = count($recom[$i]);
+                $jumlahR[$user_id[$i]] = count($user_rating);
+                $precision[$user_id[$i]] = count($relevant) / count($recom[$i]);
+                $recall[$user_id[$i]] = count($relevant) / count($user_rating);
+                //print_r($recom[$i]);
+                //$data['recom'] = $recom;
+            }
+            $data['similar'] = $jumlahS;
+            $data['total'] = $jumlahM;
+            $data['relevan'] = $jumlahR;
+            $data['precision'] = $precision;
+            $data['recall'] = $recall;
+
+            //print_r($precision);
+            //print_r($recall);
+            $this->load->view('header');
+            $this->load->view('admin/admin_view_cf_precision_recall', $data);
+            $this->load->view('footer');       
+    }
+    
+    function getUsersLulus() {
+        $query = "SELECT `rs_review`.`id_user` 
+          FROM `rs_review`, `rs_user`
+          WHERE `rs_user`.`id_user` > 29 and `rs_user`.`tepat_waktu`!=0 and `rs_user`.`id_user`=`rs_review`.id_user
+          GROUP BY(`id_user`)
+          ORDER BY count(`id_mk`) DESC
+          LIMIT 0, 20";
+          $result = mysql_query($query); 
+        //$users = array(101, 118, 84, 137, 57, 59, 91, 129, 98, 31, 51, 67, 100, 116, 36, 103, 90, 124, 76, 92);
+         while ($row = mysql_fetch_array($result)) {
+          $users[] = $row{'id_user'};
+          } 
+        return $users;
+    }
+    
     function getUsers() {
         /* $query = "SELECT `id_user` 
           FROM `rs_review`
@@ -919,7 +985,6 @@ class Admin extends CI_Controller {
             
         }
     }
-    
     
     function get_cb_recommendation() {
         // Melihat rekomendasi pengguna menggunakan konten based method
