@@ -229,9 +229,9 @@ class ItemBased {
             foreach ($similarities[$item] as $sim_item => $sim) {
 
                 //echo "<tr><td>".$sim_item."</td><td> ".$sim."</td></tr>";
-                /*if (isset($items[$sim_item])) {
-                    continue; // jika sudah dirating
-                }*/
+                /* if (isset($items[$sim_item])) {
+                  continue; // jika sudah dirating
+                  } */
 
                 if (!array_key_exists($sim_item, $out)) {
                     /* error */ $out[$sim_item] == 0;
@@ -255,32 +255,67 @@ class ItemBased {
             $result = mysql_query($query);
             while ($row = mysql_fetch_array($result)) {
                 //$prereq[$item] = $row{'rating'};
-                if ($row{'rating'} >= 3 || $row{'rating'} == NULL ) {
+                if ($row{'rating'} >= 3 || $row{'rating'} == NULL) {
                     //echo "AMAN";
-                    
-                        $out[$item] = array('status' => "lulus", 'score'=>$score, 'rekomendasi'=>NULL);
-                        //$out[$item]['status']="aman";
-                        if($row{'rating'} >= 4)
-                        {
-                            $out[$item]['rekomendasi']="direkomendasikan";
-                        }
-                }else
-                {                    
-                        $out[$item] = array('status' => "belum lulus", 'score'=>$score,'rekomendasi'=>NULL);
-                        //$out[$item]['status']="tidak aman";
-                    
+
+                    $out[$item] = array('status' => "lulus", 'score' => $score, 'rekomendasi' => NULL);
+                    //$out[$item]['status']="aman";
+                    if ($row{'rating'} >= 4) {
+                        $out[$item]['rekomendasi'] = "direkomendasikan";
+                    }
+                } else {
+                    $out[$item] = array('status' => "belum lulus", 'score' => $score, 'rekomendasi' => NULL);
+                    //$out[$item]['status']="tidak aman";
                 }
                 //echo "<br>TEST ".$out[$item];
             }
-        }        
-        arsort($out,SORT_REGULAR);
-        
+        }
+        arsort($out, SORT_REGULAR);
+
         //print_r($out);
         //echo "<br><br>";
         //print_r($prereq);
         return array_slice($out, 0, $top); // return top n
     }
-    
+
+    function filter_mk($out,$user)
+    {
+        foreach ($out as $item => $score) {
+            $query = "SELECT DISTINCT (SELECT `prereq`
+                    FROM `rs_matakuliah`
+                    WHERE rs_matakuliah.`nama_mk`= '".$item."') prereq, MAX(rs_histori_nilai.rating) rating
+                    FROM `rs_matakuliah`, rs_histori_nilai 
+                    WHERE rs_matakuliah.`nama_mk`= '".$item."' 
+                    AND rs_histori_nilai.id_user=".$user."
+                    AND rs_matakuliah.prereq = rs_histori_nilai.id_mk";
+            //$out[$item] = $score / $sims[$item];
+            $result = mysql_query($query);
+            while ($row = mysql_fetch_array($result)) {
+                //$prereq[$item] = $row{'rating'};
+                if ($row{'rating'} >= 4 && $row{'prereq'} != NULL) {
+                    //echo "AMAN";
+                    $out[$item] = array('status' => "lulus", 'score' => $score, 'rekomendasi' => "direkomendasikan");
+                    //$out[$item]['status']="aman";                        
+                    //$out[$item]['rekomendasi'] = "direkomendasikan";
+                } else
+                if ($row{'rating'} < 4 && $row{'prereq'} != NULL) {
+                    $out[$item] = array('status' => "lulus", 'score' => $score, 'rekomendasi' => NULL);
+                    //$out[$item]['status']="tidak aman";
+                } else
+                if ($row{'rating'} == null && $row{'prereq'} != NULL) {
+                    $out[$item] = array('status' => "belum lulus", 'score' => $score, 'rekomendasi' => NULL);
+                }
+                else if($row{'prereq'} == NULL)
+                {
+                    $out[$item] = array('status' => "kosong", 'score' => $score, 'rekomendasi' => NULL);
+                }
+                //echo "<br>TEST ".$out[$item];
+            }
+        }
+        return $out;
+    }
+
+
     function filter_recommend($user, $data, $similarities, $top) {
         error_reporting(E_ALL ^ (E_NOTICE | E_WARNING));
         $out = array();
@@ -320,42 +355,18 @@ class ItemBased {
             $out[$item] = $score / $sims[$item];
         }
         //$prereq = array();
-        foreach ($out as $item => $score) {
-            $query = "SELECT DISTINCT `prereq`, MAX(rs_histori_nilai.rating) rating
-                    FROM `rs_matakuliah`, rs_histori_nilai 
-                    WHERE rs_matakuliah.`nama_mk`= '" . $item . "' 
-                    AND rs_histori_nilai.id_user=" . $user . " 
-                    AND rs_matakuliah.prereq = rs_histori_nilai.id_mk";
-            //$out[$item] = $score / $sims[$item];
-            $result = mysql_query($query);
-            while ($row = mysql_fetch_array($result)) {
-                //$prereq[$item] = $row{'rating'};
-                if ($row{'rating'} >= 3 || $row{'rating'} == NULL ) {
-                    //echo "AMAN";
-                    
-                        $out[$item] = array('status' => "lulus", 'score'=>$score, 'rekomendasi'=>NULL);
-                        //$out[$item]['status']="aman";
-                        if($row{'rating'} >= 4)
-                        {
-                            $out[$item]['rekomendasi']="direkomendasikan";
-                        }
-                }else
-                {                    
-                        $out[$item] = array('status' => "belum lulus", 'score'=>$score,'rekomendasi'=>NULL);
-                        //$out[$item]['status']="tidak aman";
-                    
-                }
-                //echo "<br>TEST ".$out[$item];
-            }
-        }        
-        arsort($out,SORT_REGULAR);
+        $outie = $this->filter_mk($out, $user);
+        arsort($outie, SORT_REGULAR);
         //print_r($out);
         //echo "<br><br>";
         //print_r($prereq);
-        return array_slice($out, 0, $top); // return top n
+        return array_slice($outie, 0, $top); // return top n
     }
 
     function full_filter_recommend($user, $data, $similarities, $top) {
+        /*
+         * Untuk akurasi
+         */
         error_reporting(E_ALL ^ (E_NOTICE | E_WARNING));
         $out = array();
         $items = array();
@@ -378,9 +389,9 @@ class ItemBased {
             foreach ($similarities[$item] as $sim_item => $sim) {
 
                 //echo "<tr><td>".$sim_item."</td><td> ".$sim."</td></tr>";
-                /*if (isset($items[$sim_item])) {
-                    continue; // jika sudah dirating
-                }*/
+                /* if (isset($items[$sim_item])) {
+                  continue; // jika sudah dirating
+                  } */
 
                 if (!array_key_exists($sim_item, $out)) {
                     /* error */ $out[$sim_item] == 0;
@@ -394,49 +405,21 @@ class ItemBased {
             $out[$item] = $score / $sims[$item];
         }
         //$prereq = array();
-        foreach ($out as $item => $score) {
-            $query = "SELECT DISTINCT `prereq`, MAX(rs_histori_nilai.rating) rating
-                    FROM `rs_matakuliah`, rs_histori_nilai 
-                    WHERE rs_matakuliah.`nama_mk`= '" . $item . "' 
-                    AND rs_histori_nilai.id_user=" . $user . " 
-                    AND rs_matakuliah.prereq = rs_histori_nilai.id_mk";
-            //$out[$item] = $score / $sims[$item];
-            $result = mysql_query($query);
-            while ($row = mysql_fetch_array($result)) {
-                //$prereq[$item] = $row{'rating'};
-                if ($row{'rating'} >= 3 || $row{'rating'} == NULL ) {
-                    //echo "AMAN";
-                    
-                        $out[$item] = array('status' => "lulus", 'score'=>$score, 'rekomendasi'=>NULL);
-                        //$out[$item]['status']="aman";
-                        if($row{'rating'} >= 4)
-                        {
-                            $out[$item]['rekomendasi']="direkomendasikan";
-                        }
-                }else
-                {                    
-                        $out[$item] = array('status' => "belum lulus", 'score'=>$score,'rekomendasi'=>NULL);
-                        //$out[$item]['status']="tidak aman";
-                    
-                }
-                //echo "<br>TEST ".$out[$item];
-            }
-        }        
-        arsort($out,SORT_REGULAR);
-        
+        $outie=$this->filter_mk($out, $user);
+        arsort($outie, SORT_REGULAR);
+
         //echo "<br>$user<br>";
         //print_r($out);        
         //print_r($prereq);$key_out = array();
-        foreach ($out as $item => $score) {
+        foreach ($outie as $item => $score) {
             $key_out[] = $item;
         }
         //echo "<br>$user<br>";
         //print_r($key_out);
-
         //arsort($key_out);
         return array_slice($key_out, 0, $top);
     }
-    
+
     function full_recommend($user, $data, $similarities, $top) {
         error_reporting(E_ALL ^ (E_NOTICE | E_WARNING));
         $out = array();

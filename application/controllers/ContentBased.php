@@ -121,7 +121,7 @@ class ContentBased {
     }
 
     function getuserMkRating($userID) {
-        $string_query = "SELECT `nama_mk`, `rating`, `deskripsi` FROM `rs_review`,`rs_matakuliah` WHERE `rs_review`.`id_mk` = `rs_matakuliah`.`id_mk` AND `rs_review`.`id_user` = " . $userID;
+        $string_query = "SELECT `nama_mk`, `rating`, `deskripsi` FROM `rs_review`,`rs_matakuliah` WHERE `rs_review`.`id_mk` = `rs_matakuliah`.`id_mk` AND `rs_review`.`id_user` = " . $userID."";
         $result = mysql_query($string_query) or die("<br/><br/>" . mysql_error());
         $rating = array();
         while ($row = mysql_fetch_array($result)) {

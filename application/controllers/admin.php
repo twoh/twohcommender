@@ -545,7 +545,7 @@ class Admin extends CI_Controller {
         //$this->load->view('user/user_view_rekomendasi', $data);
         //$this->load->view('footer');
     }
-    
+
     function get_recommendation() {
         //Mendapatkan rekomendasi collaborative filtering
         if (($this->session->userdata('user_name') == "herdi")) {
@@ -632,72 +632,169 @@ class Admin extends CI_Controller {
             $this->login();
     }
 
+    function data_rating_user($userID) {
+        //Mengambil data rating mata kuliah pengguna dengan nilai >= C
+        $result = mysql_query("SELECT `nama_mk`, `rating` FROM `rs_review`,`rs_matakuliah` WHERE `rs_review`.`id_mk` = `rs_matakuliah`.`id_mk` AND `rs_review`.`id_user` = " . $userID . " AND rating >=3");
+        $mk_nilai = array();
+        while ($row = mysql_fetch_array($result)) {
+            $mk_nilai[] = $row{'nama_mk'};
+        }
+        return $mk_nilai;
+    }
+
     function cf_accuration_filter() {
         //Mendapatkan akurasi precision recall Content based        
-            require_once 'ItemBased.php';
-            require_once 'ContentBased.php';
-            $user_id = $this->getUsersLulus();
-            $result = mysql_query(
+        require_once 'ItemBased.php';
+        require_once 'ContentBased.php';
+        $user_id = $this->getUsersLulus();
+        $result = mysql_query(
                 "SELECT `rs_review`.`id_user`, `rating`,`nama_mk` 
                             FROM `rs_review`,`rs_matakuliah`, `rs_user`
                             WHERE `rs_matakuliah`.`id_mk` = `rs_review`.`id_mk` and `rating` > 0 and `rs_user`.`tepat_waktu` != 0 and rs_user.id_user = rs_review.id_user
                             ORDER BY `rs_review`.`id_user` ASC;");
-            $recommend = new ItemBased();
-            $recommendCB = new ContentBased();
-            $ratings = array();
-            $recom = array();
-            $totalUsers = count($user_id);
-            for ($i = 0; $i < $totalUsers; $i++) {
-                while ($row = mysql_fetch_array($result)) {
-                    $userID = $row{'id_user'};
-                    $ratings[$userID][$row{'nama_mk'}] = $row{'rating'};
-                }
-                //print_r($ratings);
-                //echo "<br>";            
-                $transform = $recommend->transformPreferences($ratings);
-                $similiarity = $recommend->generateSimilarities($transform);
-                $recom[$i] = $recommend->full_filter_recommend($user_id[$i], $transform, $similiarity, 12);
-                $user_rating = $recommendCB->getuserMkRating($user_id[$i]);
-                $relevant = array_intersect($recom[$i], $user_rating);
-                //print_r($recom[$i]);
-                //print_r($user_rating);
-
-                $jumlahS[$user_id[$i]] = count($relevant);
-                $jumlahM[$user_id[$i]] = count($recom[$i]);
-                $jumlahR[$user_id[$i]] = count($user_rating);
-                $precision[$user_id[$i]] = count($relevant) / count($recom[$i]);
-                $recall[$user_id[$i]] = count($relevant) / count($user_rating);
-                //print_r($recom[$i]);
-                //$data['recom'] = $recom;
+        $recommend = new ItemBased();
+        $recommendCB = new ContentBased();
+        $ratings = array();
+        $recom = array();
+        $totalUsers = count($user_id);
+        for ($i = 0; $i < $totalUsers; $i++) {
+            while ($row = mysql_fetch_array($result)) {
+                $userID = $row{'id_user'};
+                $ratings[$userID][$row{'nama_mk'}] = $row{'rating'};
             }
-            $data['similar'] = $jumlahS;
-            $data['total'] = $jumlahM;
-            $data['relevan'] = $jumlahR;
-            $data['precision'] = $precision;
-            $data['recall'] = $recall;
+            //print_r($ratings);
+            //echo "<br>";            
+            $transform = $recommend->transformPreferences($ratings);
+            $similiarity = $recommend->generateSimilarities($transform);
+            $recom[$i] = $recommend->full_filter_recommend($user_id[$i], $transform, $similiarity, 20);
+            $user_rating = $recommendCB->getuserMkRating($user_id[$i]);
+            //$relevantTemp = array_intersect($recom[$i], $user_rating);
+            $cekNilai = $this->data_rating_user($user_id[$i]);
+            /*echo "<br>Nilai<br>";
+            print_r($cekNilai);
+            echo "<br>Rekomendasi<br>";
+            print_r($recom[$i]);*/
+            $relevant = array_intersect($recom[$i], $cekNilai);
+            //print_r($recom[$i]);
+            //print_r($user_rating);
 
-            //print_r($precision);
-            //print_r($recall);
-            $this->load->view('header');
-            $this->load->view('admin/admin_view_cf_precision_recall', $data);
-            $this->load->view('footer');       
+            $jumlahS[$user_id[$i]] = count($relevant);
+            $jumlahM[$user_id[$i]] = count($recom[$i]);
+            $jumlahR[$user_id[$i]] = count($user_rating);
+            $precision[$user_id[$i]] = count($relevant) / count($recom[$i]);
+            $recall[$user_id[$i]] = count($relevant) / count($user_rating);
+            //print_r($recom[$i]);
+            //$data['recom'] = $recom;
+        }
+        $data['similar'] = $jumlahS;
+        $data['total'] = $jumlahM;
+        $data['relevan'] = $jumlahR;
+        $data['precision'] = $precision;
+        $data['recall'] = $recall;
+
+        //print_r($precision);
+        //print_r($recall);
+        $this->load->view('header');
+        $this->load->view('admin/admin_view_cf_precision_recall', $data);
+        $this->load->view('footer');
     }
     
+    function cb_accuration_filter() {
+        //Akurasi dari content based
+        error_reporting(E_ALL ^ (E_NOTICE | E_WARNING));
+        //Mendapatkan rekomendasi
+        require_once 'ContentBased.php';
+        //print_r($ratings);
+        $userID = $this->getUsersLulus();
+        $recommend = new ContentBased();
+        //$index = $recommend->getIndexCol();
+        $userCount = count($userID);
+        $precision = array();
+        $recall = array();
+        $matchDocs = array();
+        $matchDocs2 = array();
+        $index = $recommend->getIndexAcc();
+        
+        for ($i = 0; $i < $userCount; $i++) {
+            $query = $recommend->getHistory($userID[$i]);            
+            foreach ($query as $qterm) {
+                $entry = $index['dictionary'][$qterm];
+                echo $entry['dictionary'][$qterm];
+                if (is_array($entry['postings'])) {
+                    foreach ($entry['postings'] as $docID => $posting) {
+                        //if(!isset($matchDocs[$docID]))
+                        $matchDocs[$i][] = $docID;
+                    }
+                }
+            }            
+            $matchDocsNorm = array();            
+            foreach ($matchDocs[$i] as $key => $value) {
+                //Mengambil mata kuliah yang lulus prerequisites
+                $query2 = "SELECT DISTINCT (SELECT `prereq`
+                    FROM `rs_matakuliah`
+                    WHERE rs_matakuliah.`nama_mk`= '".$value."') prereq, MAX(rs_histori_nilai.rating) rating
+                    FROM `rs_matakuliah`, rs_histori_nilai 
+                    WHERE rs_matakuliah.`nama_mk`= '".$value."' 
+                    AND rs_histori_nilai.id_user=".$userID[$i]."
+                    AND rs_matakuliah.prereq = rs_histori_nilai.id_mk";
+                //$out[$item] = $score / $sims[$item];
+                $result2 = mysql_query($query2);
+                //echo "ITEM $value<br>";
+                while ($row = mysql_fetch_array($result2)) {
+                    //$prereq[$item] = $row{'rating'};                    
+                    if (($row{'rating'} != NULL && $row{'prereq'} != NULL)||$row{'prereq'} == NULL) {
+                        //echo "AMAN<br>";
+                        $matchDocsNorm[] = $value;                                  
+                    } else {     
+                        
+                    }                    
+                }
+            }        
+            
+            //Mengambil data rating positif
+            $cekNilai = $this->data_rating_user($userID[$i]);
+            $user_rating = $recommend->getuserMkRating($userID[$i]);
+            $matchDocs2[$i] = array_slice(array_values(array_unique($matchDocsNorm)), 0, 20);
+            $similarity = array_intersect($matchDocs2[$i], $cekNilai);
+            
+            $jumlahS[$userID[$i]] = count($similarity);
+            $jumlahM[$userID[$i]] = count($matchDocs2[$i]);
+            $jumlahR[$userID[$i]] = count($user_rating);
+            $precision[$userID[$i]] = count($similarity) / count($matchDocs2[$i]);
+            $recall[$userID[$i]] = count($similarity) / count($user_rating);
+            
+        }
+        $data['similar'] = $jumlahS;
+        $data['total'] = $jumlahM;
+        $data['relevan'] = $jumlahR;
+        $data['precision'] = $precision;
+        $data['recall'] = $recall;
+        $data['jenis'] = "kedua";
+        
+        $this->load->view('header');
+        $this->load->view('admin/admin_view_cb_accuration', $data);
+        $this->load->view('footer');
+    }
+
     function getUsersLulus() {
-        $query = "SELECT `rs_review`.`id_user` 
+        /*
+         * Mendapat data mahasiswa yang telah lulus
+         */
+        
+        /*$query = "SELECT `rs_review`.`id_user` 
           FROM `rs_review`, `rs_user`
           WHERE `rs_user`.`id_user` > 29 and `rs_user`.`tepat_waktu`!=0 and `rs_user`.`id_user`=`rs_review`.id_user
           GROUP BY(`id_user`)
           ORDER BY count(`id_mk`) DESC
           LIMIT 0, 20";
-          $result = mysql_query($query); 
-        //$users = array(101, 118, 84, 137, 57, 59, 91, 129, 98, 31, 51, 67, 100, 116, 36, 103, 90, 124, 76, 92);
-         while ($row = mysql_fetch_array($result)) {
-          $users[] = $row{'id_user'};
-          } 
+        $result = mysql_query($query);*/
+        $users = array(45, 64, 134, 46, 135, 47, 88, 114, 138, 115, 139, 40, 52, 71, 97, 53, 99, 121, 122, 104);
+        /*while ($row = mysql_fetch_array($result)) {
+            $users[] = $row{'id_user'};
+        }*/
         return $users;
     }
-    
+
     function getUsers() {
         /* $query = "SELECT `id_user` 
           FROM `rs_review`
@@ -724,7 +821,7 @@ class Admin extends CI_Controller {
         }
         else
             $this->login();
-    }    
+    }
 
     function getKeywordMKPilihan() {
         if (($this->session->userdata('user_name') == "herdi")) {
@@ -742,7 +839,8 @@ class Admin extends CI_Controller {
     public function showAllHistoriNilai() {
         // Melihat data histori nilai dari mahasiswa bersangkutan
         if (($this->session->userdata('user_name') == "herdi")) {
-            $userID = $this->getUsers();
+            //$userID = $this->getUsers();
+            $userID = $this->getUsersLulus();
             $userCount = count($userID);
             for ($i = 0; $i < $userCount; $i++) {
                 $user_ID = $userID[$i];
@@ -776,7 +874,8 @@ class Admin extends CI_Controller {
 
     function showDataRating() {
         if (($this->session->userdata('user_name') == "herdi")) {
-            $userID = $this->getUsers();
+            //$userID = $this->getUsers();
+            $userID = $this->getUsersLulus();
             $userCount = count($userID);
             for ($i = 0; $i < $userCount; $i++) {
                 $user_ID = $userID[$i];
@@ -818,8 +917,8 @@ class Admin extends CI_Controller {
         }
         else
             $this->login();
-    }
-
+    }    
+    
     function cb_accuration() {
         //Akurasi dari content based
         error_reporting(E_ALL ^ (E_NOTICE | E_WARNING));
@@ -968,24 +1067,20 @@ class Admin extends CI_Controller {
         $recommend = new ContentBased();
         $index = $recommend->getIndexAcc();
         $docCount = count($index['docCount']);
-        foreach ($index['dictionary'] as $term => $df)
-        {
-            foreach($df as $keys => $values)
-            {
-                foreach($values as $nama_mk => $tf)
-                {
+        foreach ($index['dictionary'] as $term => $df) {
+            foreach ($df as $keys => $values) {
+                foreach ($values as $nama_mk => $tf) {
                     //print_r($keys);
-                    $tfidf=($tf['tf'] *log($docCount / $df['df'], 2));
+                    $tfidf = ($tf['tf'] * log($docCount / $df['df'], 2));
                     //echo $term." dan ".$df['df']." dan ".$values." dan ".$nama_mk." dan ".$tf['tf']." dan $tfidf <br/>";
-                    $query = "INSERT INTO `rs_term`(`term`, `nama_mk`, `tf`, `idf`, `tfidf`) VALUES ('".$term."','".$nama_mk."','".$tf['tf']."','".$df['df']."','".$tfidf."')";
+                    $query = "INSERT INTO `rs_term`(`term`, `nama_mk`, `tf`, `idf`, `tfidf`) VALUES ('" . $term . "','" . $nama_mk . "','" . $tf['tf'] . "','" . $df['df'] . "','" . $tfidf . "')";
                     mysql_query($query);
                     //$tfidf=0;
-                }                
+                }
             }
-            
         }
     }
-    
+
     function get_cb_recommendation() {
         // Melihat rekomendasi pengguna menggunakan konten based method
         error_reporting(E_ALL ^ (E_NOTICE | E_WARNING));

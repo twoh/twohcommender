@@ -282,18 +282,21 @@ class User extends CI_Controller {
     }
 
     function get_recommendation() {
-        //Mendapatkan rekomendasi
+        //Mendapatkan rekomendasi Colaborative filtering
         require_once 'ItemBased.php';
-        /*$result = mysql_query(
-                "SELECT `id_user`, `rating`,`nama_mk` 
+        if ($this->cek_rating()->num_rows > 6) {
+            $result = mysql_query(
+                    "SELECT `id_user`, `rating`,`nama_mk` 
                             FROM `rs_review`,`rs_matakuliah`
                             WHERE `rs_matakuliah`.`id_mk` = `rs_review`.`id_mk` and `rating` > 0 
-                            ORDER BY `rs_review`.`id_user` ASC;");*/
-        $result = mysql_query(
-                "SELECT `rs_review`.`id_user`, `rating`,`nama_mk` 
+                            ORDER BY `rs_review`.`id_user` ASC;");
+        } else {
+            $result = mysql_query(
+                    "SELECT `rs_review`.`id_user`, `rating`,`nama_mk` 
                             FROM `rs_review`,`rs_matakuliah`, `rs_user`
                             WHERE `rs_matakuliah`.`id_mk` = `rs_review`.`id_mk` and `rating` > 0 and `rs_user`.`tepat_waktu` != 0 and rs_user.id_user = rs_review.id_user
                             ORDER BY `rs_review`.`id_user` ASC;");
+        }
         $ratings = array();
         while ($row = mysql_fetch_array($result)) {
             $userID = $row{'id_user'};
@@ -317,15 +320,15 @@ class User extends CI_Controller {
         $this->load->view('user/user_fil_view_rekomendasi', $data);
         $this->load->view('footer');
     }
-    
+
     function get_full_recommendation() {
         //Mendapatkan rekomendasi
         require_once 'ItemBased.php';
-        /*$result = mysql_query(
-                "SELECT `id_user`, `rating`,`nama_mk` 
-                            FROM `rs_review`,`rs_matakuliah`
-                            WHERE `rs_matakuliah`.`id_mk` = `rs_review`.`id_mk` and `rating` > 0 
-                            ORDER BY `rs_review`.`id_user` ASC;");*/
+        /* $result = mysql_query(
+          "SELECT `id_user`, `rating`,`nama_mk`
+          FROM `rs_review`,`rs_matakuliah`
+          WHERE `rs_matakuliah`.`id_mk` = `rs_review`.`id_mk` and `rating` > 0
+          ORDER BY `rs_review`.`id_user` ASC;"); */
         $result = mysql_query(
                 "SELECT `rs_review`.`id_user`, `rating`,`nama_mk` 
                             FROM `rs_review`,`rs_matakuliah`, `rs_user`
@@ -354,8 +357,11 @@ class User extends CI_Controller {
         $this->load->view('user/user_fil_view_rekomendasi', $data);
         $this->load->view('footer');
     }
-    
+
     function constrain_nilai($id_user) {
+        /*
+         * Mengecek apakah sudah lulus tingkat 1 dan 2 atau belum
+         */
         $query = "SELECT count(rs_histori_nilai.id_mk) jumlah, tingkat FROM `rs_histori_nilai`,rs_mk_wajib WHERE rs_histori_nilai.id_user = " . $id_user . " AND rs_histori_nilai.id_mk = rs_mk_wajib.id_mk GROUP BY tingkat";
         $result = mysql_query($query);
         $histori = array();
@@ -367,11 +373,11 @@ class User extends CI_Controller {
         }
         else
             $lulus = FALSE;
-        print_r($histori);
+        //print_r($histori);
         return $lulus;
     }
 
-    function get_cb_recommendation() {
+    function get_cb_recommendation_old() {
         //fungsi untuk mendapat rekomendasi berdasarkan content based recommendation
         error_reporting(E_ALL ^ (E_NOTICE | E_WARNING));
         //Mendapatkan rekomendasi
@@ -411,6 +417,86 @@ class User extends CI_Controller {
             $data['recom'] = $matchDocs2;
             $this->load->view('header');
             $this->load->view('user/user_view_cb_rekomendasi', $data);
+            $this->load->view('footer');
+        } else {
+            $data['lulus'] = "histori nilai kurang";
+            $this->load->view('header');
+            $this->load->view('user/user_view_cb_rekomendasi', $data);
+            $this->load->view('footer');
+        }
+    }
+
+    function get_cb_recommendation() {
+        //fungsi untuk mendapat rekomendasi berdasarkan content based recommendation
+        error_reporting(E_ALL ^ (E_NOTICE | E_WARNING));
+        //Mendapatkan rekomendasi
+        require_once 'ContentBased.php';
+        //print_r($ratings);
+        $userID = $this->session->userdata('user_id');
+        if ($this->constrain_nilai($userID) == TRUE) {
+            $recommend = new ContentBased();
+            //$index = $recommend->getIndexCol();
+            $query = $recommend->getHistory($userID);
+            $index = $recommend->getIndexCol($userID);
+            $matchDocs = array();
+            $docCount = count($index['docCount']);
+            foreach ($query as $qterm) {
+                $entry = $index['dictionary'][$qterm];
+                //echo $entry['dictionary'][$qterm];
+                if (is_array($entry['postings'])) {
+                    foreach ($entry['postings'] as $docID => $posting) {
+                        //if(!isset($matchDocs[$docID]))
+                        $matchDocs[$docID] +=
+                                $posting['tf'] *
+                                log($docCount + 1 / $entry['df'] + 1, 2);
+                    }
+                }
+            }
+            //echo "<br>hasil<br>";
+            // length normalise
+            $matchDocsNorm = $recommend->normalise($matchDocs);
+            foreach ($matchDocsNorm as $item => $score) {
+                $query = "SELECT DISTINCT (SELECT `prereq`
+                    FROM `rs_matakuliah`
+                    WHERE rs_matakuliah.`nama_mk`= '" . $item . "') prereq, MAX(rs_histori_nilai.rating) rating
+                    FROM `rs_matakuliah`, rs_histori_nilai 
+                    WHERE rs_matakuliah.`nama_mk`= '" . $item . "' 
+                    AND rs_histori_nilai.id_user=" . $userID . "
+                    AND rs_matakuliah.prereq = rs_histori_nilai.id_mk";
+                //$out[$item] = $score / $sims[$item];
+                $result = mysql_query($query);
+                while ($row = mysql_fetch_array($result)) {
+                    //$prereq[$item] = $row{'rating'};
+                    if ($row{'rating'} >= 4 && $row{'prereq'} != NULL) {
+                        //echo "AMAN";
+                        $matchDocsNorm[$item] = array('status' => "lulus", 'score' => $score, 'rekomendasi' => NULL);
+                        //$out[$item]['status']="aman";                        
+                        $matchDocsNorm[$item]['rekomendasi'] = "direkomendasikan";
+                    } else
+                    if ($row{'rating'} < 4 && $row{'prereq'} != NULL) {
+                        $matchDocsNorm[$item] = array('status' => "lulus", 'score' => $score, 'rekomendasi' => NULL);
+                        //$out[$item]['status']="tidak aman";
+                    } else
+                    if ($row{'rating'} == null && $row{'prereq'} != NULL) {
+                        $matchDocsNorm[$item] = array('status' => "belum lulus", 'score' => $score, 'rekomendasi' => NULL);
+                    } else if ($row{'prereq'} == NULL) {
+                        $matchDocsNorm[$item] = array('status' => "kosong", 'score' => $score, 'rekomendasi' => NULL);
+                    }
+                    //echo "<br>TEST ".$out[$item];
+                }
+            }
+            $matchDocs2 = array_slice($matchDocsNorm, 0, 10);
+            //print_r($matchDocs2);
+            /* print_r($matchDocs);
+              foreach ($matchDocs2 as $docID => $score) {
+              $matchDocs2[$docID] = $score / $index['docCount'][$docID];
+              echo "doccount: $docCount docID: $docID score : $score index : " . $index['docCount'][$docID] . " matchDocs: " . $matchDocs2[$docID] . "<br>";
+              } */
+            arsort($matchDocs2); // high to low
+            //var_dump($matchDocs2);
+            $data['recom'] = $matchDocs2;
+            $this->load->view('header');
+            $this->load->view('user/user_fil_view_cb_rekomendasi', $data);
             $this->load->view('footer');
         } else {
             $data['lulus'] = "histori nilai kurang";
